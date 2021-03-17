@@ -5,16 +5,18 @@
 * See history.txt
 */
 import java.io.IOException;
-import java.io.FileWriter; 
+import java.io.PrintWriter;
+import java.io.File;
+import java.io.FileInputStream;
 import java.nio.file.Path;
+import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import java.io.FileInputStream;  
-import java.nio.file.Files;
+  
 import java.util.ArrayList; 
 
 abstract class PSystem {
@@ -137,7 +139,23 @@ abstract class PSystem {
     return center;
   }
 
+  public void saveSwarm(String filename) {
+    try {
+      saveSwarmJSON(new PrintWriter(new File("data/json/" + filename)));
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
   public void saveSwarm() {
+    try {
+      saveSwarmJSON(new PrintWriter(new File("data/json/" + modelProperties.getProperty("swarmName"))));
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void saveSwarmJSON(PrintWriter jsonFile) {
 /** 
 * Save environment settings to JSON file.
 * 
@@ -244,11 +262,9 @@ abstract class PSystem {
       json.put("agents",jsonAgents);
       json.put("params",jsonParams);
       json.put("info",jsonInfo);
-      try {
-        json.write(new FileWriter("data/json/" + modelProperties.getProperty("swarmName")));
-      } catch (IOException e) {
-        e.printStackTrace();
-      } 
+
+      jsonFile.println(json.toString(4));
+      jsonFile.flush();
     } catch (JSONException e) {
       e.printStackTrace();
     }
