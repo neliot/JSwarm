@@ -21,14 +21,6 @@ import java.io.FileInputStream;
 
 public class JSwarm {
   
-  static void run(PSystem system) {
-     for(double pr = 0.1; pr < 1.0; pr+=0.1) {
-       for (double pc = 10; pc <= 100; pc+=10) {
-          experiment(system,pr,pc);
-       }
-     }
-   }  
-
   static void experiment(PSystem system) {
     system._loggingP = true;
     system._loggingN = true;
@@ -78,6 +70,14 @@ public class JSwarm {
     system.plog.quit();
     system.nClog.quit();
     system.nRlog.quit();
+  }
+
+  static void run(PSystem system) {
+    for(double pr = 0.1; pr < 1.0; pr+=0.1) {
+      for (double pc = 10; pc <= 100; pc+=10) {
+         experiment(system,pr,pc);
+      }
+    }
   }
 
   static public void main(String[] args) {
