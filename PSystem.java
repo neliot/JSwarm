@@ -512,7 +512,7 @@ abstract class PSystem {
     try {
       // create agent in centred quartile.
       Particle p = new Particle(Particle._nextParticleId++, (double)x, (double)y, (double)z, this._Cb, this._Rb, 10.0, 1.0, this._speed);
-      p.setDestinations((ArrayList<Destination>) this.destinations.clone());
+      p.setDestinations(this.destinations);
       this.S.add(p);
     } catch (Exception e) {
       System.out.println(e);

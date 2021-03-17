@@ -129,7 +129,10 @@ class Particle {
 * 
 * @param ArrayList of Destinations
 */
-    this._destinations = destinations;
+    this._destinations.clear();
+    for(Destination d : destinations) {
+      this._destinations.add(d);
+    }
   }
 
   public void addDestination(Destination destination) {
