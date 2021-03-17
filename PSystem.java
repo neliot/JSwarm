@@ -7,6 +7,9 @@
 import java.io.IOException;
 import java.io.FileWriter; 
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -139,13 +142,17 @@ abstract class PSystem {
 * Save environment settings to JSON file.
 * 
 */  
-    int i = 0;
     JSONObject json = new JSONObject();
     JSONObject jsonParams = new JSONObject();
-//    JSONObject jsonInfo = new JSONObject();
-//    jsonInfo.put("date",LocalDate.now());
-//    jsonInfo.put("time",LocalTime.now());
-//    jsonInfo.put("by","PSwarm CLI");
+    JSONObject jsonInfo = new JSONObject();
+
+    try {
+      jsonInfo.put("by","JSwarm CLI");
+      jsonInfo.put("date",LocalDate.now());
+      jsonInfo.put("time",LocalTime.now());
+    } catch (JSONException e1) {
+      e1.printStackTrace();
+    }
 
     JSONObject jsonAgents = new JSONObject();
 //    JSONArray jsonAgentsProps = new JSONArray();
@@ -168,9 +175,6 @@ abstract class PSystem {
     JSONArray jsonObstaclesY = new JSONArray();
     JSONArray jsonObstaclesZ = new JSONArray();
     
-//    PrintWriter output;
-//    output = createWriter("data/save/P-"+_modelId+"-agents.dat"); 
-//    output.println(this.S.size() + "," + this._Cb + "," + this._Rb + "," + this._kr + "," + this._kc + "," + this._kd +  "," + this._pc + "," + this._pr);
     try {
       jsonParams.put("cb",this._Cb);
 //    jsonParams.put("seed",this._seed);
@@ -191,14 +195,12 @@ abstract class PSystem {
       jsonParams.put("stability_factor", 0.0);
       jsonParams.put("exp_rate", 0.2);
 
-      i = 0;
+
       for(Particle p : S) {
 //      jsonAgentsProps.setJSONObject(i,p.getJSONProps());
         jsonAgentsX.put(p._loc.x);
         jsonAgentsY.put(p._loc.y);
         jsonAgentsZ.put(p._loc.z);
-        i++;
-//      output.println(p.toString());
       }
     
 //    jsonAgentsCoords.put(JSONArray({jsonAgentsX,jsonAgentsY,jsonAgentsZ});
@@ -209,13 +211,11 @@ abstract class PSystem {
       jsonAgents.put("coords",jsonAgentsCoords);
 //    jsonAgents.put("props",jsonAgentsProps);
 
-      i = 0;
       for(Obstacle o : obstacles) {
 //      jsonObstaclesProps.setJSONObject(i,o.getJSONProps());
         jsonObstaclesX.put(o._loc.x);
         jsonObstaclesY.put(o._loc.y);
         jsonObstaclesZ.put(o._loc.z);
-        i++;
       } 
 
       jsonObstaclesCoords.put(jsonObstaclesX);
@@ -224,13 +224,13 @@ abstract class PSystem {
 
       jsonObstacles.put("coords",jsonObstaclesCoords);
 //    jsonObstacles.put("props",jsonObstaclesProps);
-    i = 0;
+
       for(Destination d : destinations) {
 //      jsonDestinationsProps.setJSONObject(i,d.getJSONProps());
         jsonDestinationsX.put(d._loc.x);
         jsonDestinationsY.put(d._loc.y);
         jsonDestinationsZ.put(d._loc.z);
-        i++;
+
       }        
 
       jsonDestinationsCoords.put(jsonDestinationsX);
@@ -243,9 +243,8 @@ abstract class PSystem {
       json.put("destinations",jsonDestinations);
       json.put("agents",jsonAgents);
       json.put("params",jsonParams);
-  //  json.put("info",jsonInfo);
+      json.put("info",jsonInfo);
       try {
-//        jsonOut = new FileWriter("data/json/" + modelProperties.getProperty("swarmName"));
         json.write(new FileWriter("data/json/" + modelProperties.getProperty("swarmName")));
       } catch (IOException e) {
         e.printStackTrace();
