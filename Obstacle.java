@@ -3,7 +3,6 @@
 *************************************************
 * See history.txt
 */
-//import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -70,7 +69,6 @@ class Obstacle {
       o.put("mass",_mass);
       o.put("ob",_Ob);
     } catch (JSONException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     return o;

@@ -3,9 +3,7 @@
 *************************************************
 * See history.txt
 */
-// JAVA-IMPLEMENTATION
-//  import java.io.PrintWriter; 
-//  import java.io.File;
+
 import java.io.PrintWriter; 
 import java.io.File;
 
