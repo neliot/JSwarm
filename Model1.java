@@ -105,7 +105,7 @@ class Model1 extends PSystem {
       }
       vcb.add(v);
       if (this._loggingN && this._loggingP) {
-        nData += plog._counter + "," + p._id + "," + n.toString() + "," + v.x + "," + v.y + "," + v.z + "," + v.mag() + "," + distance + "\n";
+        nData += plog._counter + "," + p.logString(_logMin) + "," + n.logString(_logMin) + "," + v.x + "," + v.y + "," + v.z + "," + v.mag() + "," + distance + "\n";
       }
     }
     if (this._loggingN && this._loggingP) {
@@ -143,7 +143,7 @@ class Model1 extends PSystem {
         v = PVectorD.sub(p._loc, n._loc).setMag(dist - distance).mult(this._kr);
         vrb.add(v);
         if (this._loggingN && this._loggingP) {
-          nData += plog._counter + "," + p._id + "," + n.toString() + "," + v.x + "," + v.y + "," + v.z + "," + v.mag() + "\n";
+          nData += plog._counter + "," + p.logString(this._logMin) + "," + n.logString(this._logMin) + "," + v.x + "," + v.y + "," + v.z + "," + v.mag() + "\n";
         }
       }
     }
