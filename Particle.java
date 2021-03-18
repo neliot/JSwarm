@@ -198,11 +198,11 @@ class Particle {
 * @param force PVector
 */
     // mass of Particles is set to 1. This is for future work.
-    // PVectorD f = PVectorD.div(change,this._mass);
-    PVectorD f = change.copy();
-    f.x = rtodp(f.x,9); 
-    f.y = rtodp(f.y,9); 
-    f.z = rtodp(f.z,9); 
+    PVectorD f = PVectorD.div(change,this._mass);
+//    PVectorD f = change.copy();
+//    f.x = rtodp(f.x,9); 
+//    f.y = rtodp(f.y,9); 
+//    f.z = rtodp(f.z,9); 
     this._resultant.set(f);
   }
 
