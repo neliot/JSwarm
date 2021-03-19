@@ -199,10 +199,10 @@ class Particle {
 */
     // mass of Particles is set to 1. This is for future work.
     PVectorD f = PVectorD.div(change,this._mass);
-//    PVectorD f = change.copy();
-//    f.x = rtodp(f.x,9); 
-//    f.y = rtodp(f.y,9); 
-//    f.z = rtodp(f.z,9); 
+    // PVectorD f = change.copy();
+    // f.x = rtodp(f.x,9); 
+    // f.y = rtodp(f.y,9); 
+    // f.z = rtodp(f.z,9); 
     this._resultant.set(f);
   }
 
@@ -221,12 +221,16 @@ class Particle {
     // helping the garbage collector again;
     this._nextLocation.x = this._loc.x;
     this._nextLocation.y = this._loc.y;
-    this._nextLocation.add(_resultant);
+    this._nextLocation.z = this._loc.z;
+    this._resultant.x = rtodp(this._resultant.x,9);
+    this._resultant.y = rtodp(this._resultant.y,9);
+    this._resultant.z = rtodp(this._resultant.z,9);
+    this._nextLocation.add(this._resultant);
   }
 
   public void move() {
 /** 
-* Updates the position of the particle based on the _acceleration.
+* Updates the position of the particle based on the _resultant.
 */
     // Copy values rather than object! Lets help the garbage collector out!
     this._loc.x = _nextLocation.x;
