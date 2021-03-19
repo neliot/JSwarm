@@ -24,6 +24,7 @@ class Model1 extends PSystem {
 */
     String pData = "";
     PVectorD change = new PVectorD(0,0,0);
+    PVectorD stepChange = new PVectorD(0,0,0);
     PVectorD avoid = new PVectorD(0,0,0);
     PVectorD dir = new PVectorD(0,0,0);
     PVectorD coh = new PVectorD(0,0,0);
@@ -56,12 +57,14 @@ class Model1 extends PSystem {
       change.add(rep);
       
       inter = PVectorD.add(coh,rep);
+      stepChange = change.copy();
+      stepChange.setMag(p._topspeed);
       
       if (_loggingP) {
         if (_logMin) {
-          pData += plog._counter + "," + p.logString(_logMin) + "," + coh.x + "," + coh.y + "," + coh.mag() + "," + rep.x + "," + rep.y + "," + rep.mag() + "," + inter.x + "," + inter.y + "," + inter.mag() + "," + dir.x + "," + dir.y + "," + dir.mag() + "," + change.x + "," + change.y + "," + change.mag() + "\n";
+          pData += plog._counter + "," + p.logString(_logMin) + "," + coh.x + "," + coh.y + "," + coh.mag() + "," + rep.x + "," + rep.y + "," + rep.mag() + "," + inter.x + "," + inter.y + "," + inter.mag() + "," + dir.x + "," + dir.y + "," + dir.mag() + "," + stepChange.x + "," + stepChange.y + "," + stepChange.mag() + "\n";
         } else {
-          pData += plog._counter + "," + p.logString(_logMin) + "," + coh.x + "," + coh.y + "," + coh.z + "," + coh.mag() + "," + rep.x + "," + rep.y + "," +  rep.z + "," + rep.mag() + "," + inter.x + "," + inter.y + "," +  inter.z + "," + inter.mag() + "," + avoid.x + "," + avoid.y + "," + avoid.z + "," + avoid.mag() + "," + dir.x + "," + dir.y + "," + dir.z + "," + dir.mag() + "," + change.x + "," + change.y + "," + change.z + "," + change.mag() + "\n";
+          pData += plog._counter + "," + p.logString(_logMin) + "," + coh.x + "," + coh.y + "," + coh.z + "," + coh.mag() + "," + rep.x + "," + rep.y + "," +  rep.z + "," + rep.mag() + "," + inter.x + "," + inter.y + "," +  inter.z + "," + inter.mag() + "," + avoid.x + "," + avoid.y + "," + avoid.z + "," + avoid.mag() + "," + dir.x + "," + dir.y + "," + dir.z + "," + dir.mag() + "," + stepChange.x + "," + stepChange.y + "," + stepChange.z + "," + stepChange.mag() + "\n";
         }
       }
       p.setChange(change);
