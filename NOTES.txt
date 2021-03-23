@@ -4,3 +4,6 @@ javac -cp .\lib\org.json.jar PNRG.java PVectorD.java Particle.java Obstacle.java
 TO RUN
 Linux -  java -cp ".:.\lib\org.json.jar" JSwarm
 Windows -  java -cp ".;.\lib\org.json.jar" JSwarm
+
+JUPYTER NOTEBOOK
+... a mystery as ever
