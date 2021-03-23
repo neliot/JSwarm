@@ -55,8 +55,8 @@
  **************************************************
  * 20/11/2020 - 0.1.0 - NE
  **************************************************
- * 1. Refactored to use ArrayList for destinations
- * 2. Added info screens for agents and destinations
+ * 1. Refactored to use ArrayList for D
+ * 2. Added info screens for agents and D
  * 3. Added add destination, delete destination 
  * 4. Added delete agent with R Mouse
  * 5. Added "modes" for editing context

@@ -123,14 +123,14 @@ class Particle {
     return p;
   };
 
-  public void setDestinations(ArrayList<Destination> destinations) {
+  public void setDestinations(ArrayList<Destination> D) {
 /** 
 * Each agent has its own set of Desinations to allow for individual control of where agents must migrate.
 * 
 * @param ArrayList of Destinations
 */
     this._destinations.clear();
-    for(Destination d : destinations) {
+    for(Destination d : D) {
       this._destinations.add(d);
     }
   }
@@ -198,15 +198,11 @@ class Particle {
 * @param force PVector
 */
     // mass of Particles is set to 1. This is for future work.
-    // PVectorD f = PVectorD.div(change,this._mass);
-    PVectorD f = change.copy();
+    PVectorD f = PVectorD.div(change,this._mass);
+//    PVectorD f = change.copy();
 //    f.x = rtodp(f.x,9);
 //    f.y = rtodp(f.y,9);
 //    f.z = rtodp(f.z,9);
-    // PVectorD f = change.copy();
-    // f.x = rtodp(f.x,9); 
-    // f.y = rtodp(f.y,9); 
-    // f.z = rtodp(f.z,9); 
     this._resultant.set(f);
   }
 
@@ -223,13 +219,13 @@ class Particle {
         this._resultant.limit(_topspeed);    
     }
     // helping the garbage collector again;
-    this._nextLocation.x = this._loc.x + this._resultant.x;
-    this._nextLocation.y = this._loc.y + this._resultant.y;
-    this._nextLocation.z = this._loc.z + this._resultant.z;
+//    this._nextLocation.x = this._loc.x + this._resultant.x;
+//    this._nextLocation.y = this._loc.y + this._resultant.y;
+//    this._nextLocation.z = this._loc.z + this._resultant.z;
 //    this._resultant.x = rtodp(this._resultant.x,9);
 //    this._resultant.y = rtodp(this._resultant.y,9);
 //    this._resultant.z = rtodp(this._resultant.z,9);
-//    this._nextLocation.add(this._resultant);
+    this._nextLocation.add(this._resultant);
   }
 
   public void move() {
