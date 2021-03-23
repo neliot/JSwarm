@@ -219,9 +219,9 @@ class PVectorD {
     }
 
     public double dist(PVectorD v) {
-        double dx = x - v.x;
-        double dy = y - v.y;
-        double dz = z - v.z;
+        double dx = this.x - v.x;
+        double dy = this.y - v.y;
+        double dz = this.z - v.z;
         return Math.sqrt(dx*dx + dy*dy + dz*dz);
     }
 

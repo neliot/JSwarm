@@ -20,7 +20,7 @@ class Model1 extends PSystem {
 
   void update() {
 /** 
-* Update system - Updates particle positions based on forces and displays the result.
+* Update system - Updates particle positions.
 */
     String pData = "";
     PVectorD change = new PVectorD(0,0,0);
@@ -80,7 +80,6 @@ class Model1 extends PSystem {
       plog.dump(pData);
       plog.clean();
     }
-
   }
     
   PVectorD cohesion(Particle p) {
