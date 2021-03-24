@@ -20,7 +20,7 @@ class Model1 extends PSystem {
 
   void update() {
 /** 
-* Update system - Updates particle positions based on forces and displays the result.
+* Update system - Updates particle positions.
 */
     String pData = "";
     PVectorD change = new PVectorD(0,0,0);
@@ -44,11 +44,11 @@ class Model1 extends PSystem {
       rep = repulsion(p);
 
       /* Calculate Obstacle avoidance */
-      if (obstacles.size() > 0) {
+      if (this.O.size() > 0) {
         avoid = avoidObstacles(p);
       }
 
-      if (this._dest && destinations.size() > 0) {
+      if (this._dest && D.size() > 0) {
         dir = direction(p);
       }
       change.add(dir);
@@ -80,7 +80,6 @@ class Model1 extends PSystem {
       plog.dump(pData);
       plog.clean();
     }
-
   }
     
   PVectorD cohesion(Particle p) {
