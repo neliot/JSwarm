@@ -233,9 +233,9 @@ class Particle {
 * Updates the position of the particle based on the _resultant.
 */
     // Copy values rather than object! Lets help the garbage collector out!
-    this._loc.x = rtodp(_nextLocation.x,6);
-    this._loc.y = rtodp(_nextLocation.y,6);
-    this._loc.z = rtodp(_nextLocation.z,6);
+    this._loc.x = _nextLocation.x;
+    this._loc.y = _nextLocation.y;
+    this._loc.z = _nextLocation.z;
   }
 
   public void reset() {
@@ -314,7 +314,7 @@ class Particle {
       }
       angle = calcAngle(this._nbr.get(this._nbr.size()-1)._sweepAngle,this._nbr.get(0)._sweepAngle);
       dist = PVectorD.dist(this._nbr.get(0)._loc,this._nbr.get(this._nbr.size()-1)._loc); 
-      if (dist > _Cb  || angle > 180.0) {
+      if (dist > this._Cb  || angle > 180.0) {
         this._isPerim = true;
 //POPULATE GAP AGENTS
         this._gap.clear();
