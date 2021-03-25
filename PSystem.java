@@ -43,7 +43,7 @@ abstract class PSystem {
   boolean _dest = true;
   boolean _run = true;
   boolean _perimCoord = false;
-  boolean _perimCompress = false;
+  boolean _perimCompress = true;
   boolean _particleOptimise = false;
   boolean _logMin = true;
 
