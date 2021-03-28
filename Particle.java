@@ -277,16 +277,16 @@ class Particle {
     double dist;
     this._isPerim = false;
     this._gap.clear();
-    if (this._nbr.size() < 4) {
+    if (this._nbr.size() < 3) {
       this._isPerim = true;
       return;
     }
 //CALCULATE SWEEP ANGLE
-    for (Particle n : _nbr) {
+    for (Particle n : this._nbr) {
       PVectorD head = PVectorD.sub(n._loc,this._loc);
       n._sweepAngle = Math.toDegrees(Math.atan2(head.y,head.x))+180;
     }    
-  
+
 //BUBBLE SORT ARRAYLIST ON sweepAngle
     for (int i = 0; i < this._nbr.size(); i++) {
       for (int j = 0; j < this._nbr.size()-i-1; j++) {
@@ -300,7 +300,7 @@ class Particle {
       }
     }    
 //SWEEP THE ANGLES 
-    if (_nbr.size() > 0) {
+    if (this._nbr.size() > 0) {
       for (int i = 0; i < this._nbr.size()-1; i++) {
         angle = calcAngle(this._nbr.get(i)._sweepAngle, this._nbr.get(i+1)._sweepAngle);
         dist = PVectorD.dist(this._nbr.get(i)._loc, this._nbr.get(i+1)._loc);
