@@ -79,7 +79,7 @@ public class JSwarm {
   }
 
   static void run(PSystem system) {
-    for(double pr = 0.1; pr < 1.0; pr+=0.1) {
+    for(double pr = 0.1; pr <= 1.0; pr+=0.1) {
       for (double pc = 10; pc <= 100; pc+=10) {
          experiment(system,pr,pc);
       }
@@ -101,8 +101,8 @@ public class JSwarm {
     }  
     system = new Model1(); 
     System.out.println(_NAME + " : "+ _VERSION);
-//    run(system);
+    run(system);
 //  SINGLE RUN FROM JSON FILE
-    experiment(system);
+//    experiment(system);
   }
 }
