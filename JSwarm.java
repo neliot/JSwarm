@@ -46,9 +46,9 @@ public class JSwarm {
   }
 
   static void experiment(PSystem system, double pr, double pc) {
-    system.plog = new Logger("data/csv/exp-"+String.format("%.2f",pr)+"-"+String.format("%.2f",pc)+".p.csv");
-    system.nClog = new Logger("data/csv/exp-"+String.format("%.2f",pr)+"-"+String.format("%.2f",pc)+".c.csv");
-    system.nRlog = new Logger("data/csv/exp-"+String.format("%.2f",pr)+"-"+String.format("%.2f",pc)+".r.csv");
+    system.plog = new Logger("./data/csv/exp-"+String.format("%.2f",pr)+"-"+String.format("%.2f",pc)+".p.csv");
+    system.nClog = new Logger("./data/csv/exp-"+String.format("%.2f",pr)+"-"+String.format("%.2f",pc)+".c.csv");
+    system.nRlog = new Logger("./data/csv/exp-"+String.format("%.2f",pr)+"-"+String.format("%.2f",pc)+".r.csv");
     if (system._logMin) {
       system.plog.dump("STEP,ID,X,Y,PERIM,CX,CY,CMAG,RX,RY,RMAG,IX,IY,IMAG,DX,DY,DMAG,CHANGEX,CHANGEY,CHANGEMAG\n");    
       system.nClog.dump("STEP,PID,PX,PY,PPERIM,NID,NX,NY,NPERIM,COHX,COHY,COHZ,MAG,DIST\n");    
