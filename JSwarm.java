@@ -60,15 +60,14 @@ public class JSwarm {
     }
     system._loggingP = true;
     system._loggingN = true;
+    system._perimCompress = true;
     system._run = true;
     system.loadSwarm("exp1.json");
     system._pr = pr;  
     system._pc = pc;
 
-    System.out.println("\nexp-"+pr+"-"+pc);
-
     int iterations = Integer.parseInt(system.modelProperties.getProperty("iterations"));
-    System.out.println("Iterations:" + iterations);
+    System.out.println("exp-" + String.format("%.2f",pr) + "-" + String.format("%.2f",pc) + " - (" + iterations + ")");
     for(int i = 0; i < iterations; i++) {
       system.update();
       system.moveReset();
@@ -79,11 +78,20 @@ public class JSwarm {
   }
 
   static void run(PSystem system) {
-    for(double pr = 0.1; pr <= 1.0; pr+=0.1) {
-      for (double pc = 10; pc <= 100; pc+=10) {
-         experiment(system,pr,pc);
+    double prVals[] = {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0};
+    double pcVals[] = {1,10,20,30,40,50,60,70,80,90,100};
+    for (double pr : prVals) {
+      for (double pc : pcVals) {
+        experiment(system,pr,pc);
       }
     }
+    System.out.println("Complete.");
+        //  
+//    for(double pr = 0.1; pr <= 1.0; pr+=0.1) {
+//      for (double pc = 10; pc <= 100; pc+=10) {
+//         experiment(system,pr,pc);
+//      }
+//    }
   }
 
   static public void main(String[] args) {
