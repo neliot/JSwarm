@@ -85,13 +85,6 @@ public class JSwarm {
         experiment(system,pr,pc);
       }
     }
-    System.out.println("Complete.");
-        //  
-//    for(double pr = 0.1; pr <= 1.0; pr+=0.1) {
-//      for (double pc = 10; pc <= 100; pc+=10) {
-//         experiment(system,pr,pc);
-//      }
-//    }
   }
 
   static public void main(String[] args) {
@@ -107,9 +100,21 @@ public class JSwarm {
     } catch (Exception e) {
       System.out.println(e);
     }  
-    system = new Model1(); 
+    system = new Model1();
     System.out.println(_NAME + " : "+ _VERSION);
+    System.out.println("==========================");
+    System.out.println(system._model);
+    System.out.println("==========================");
     run(system);
+
+    system = new Model7();
+    System.out.println("==========================");
+    System.out.println(system._model);
+    System.out.println("==========================");
+    experiment(system,0,0);
+    System.out.println("==========================");
+    System.out.println("Complete.");
+
 //  SINGLE RUN FROM JSON FILE
 //    experiment(system);
   }
