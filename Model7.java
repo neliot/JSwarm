@@ -31,6 +31,7 @@ class Model7 extends PSystem {
     PVectorD dir = new PVectorD(0,0,0);
     PVectorD coh = new PVectorD(0,0,0);
     PVectorD rep = new PVectorD(0,0,0);
+    PVectorD perimGap = new PVectorD(0,0,0);
     PVectorD inter = new PVectorD(0,0,0);
 
     for(Particle p : S) {      
@@ -40,6 +41,7 @@ class Model7 extends PSystem {
     for(Particle p : S) {      
       avoid.set(0,0,0);
       dir.set(0,0,0);
+      perimGap.set(0,0,0);
       change.set(0,0,0); 
 
       /* Calculate Cohesion */
@@ -47,6 +49,12 @@ class Model7 extends PSystem {
 
       /* Calculate Repulsion */
       rep = repulsion(p);
+
+      /* Calculate Gap */
+      if (this._perimCompress) {
+        perimGap = gap(p);
+      }
+      
 
       /* Calculate Obstacle avoidance */
       if (this.O.size() > 0) {
@@ -60,6 +68,7 @@ class Model7 extends PSystem {
       change.add(avoid);
       change.add(coh);
       change.add(rep);
+      change.add(perimGap);
       
       inter.add(coh);
       inter.add(rep);
@@ -94,20 +103,20 @@ class Model7 extends PSystem {
 * 
 * @param p The particle that is currently being checked
 */
-  PVectorD vcb = new PVectorD(0,0,0);
-  PVectorD v = new PVectorD(0,0,0);
+    PVectorD vcb = new PVectorD(0,0,0);
+    PVectorD v = new PVectorD(0,0,0);
     double distance = 0.0;
     String nData = "";
     
 // GET ALL THE NEIGHBOURS
     for(Particle n : p._nbr) {
       distance = PVectorD.dist(p._loc,n._loc);
-      if (p._isPerim && p.hasGap() && this._perimCompress) {
-        v = PVectorD.add(p._gap.get(0)._loc,p._gap.get(1)._loc).mult(0.5);
-        v = PVectorD.sub(v,p._loc).mult(this._kg);
-      } else {
-        v = PVectorD.sub(n._loc,p._loc).mult(this._kc);
-      }
+//      if (p._isPerim && p.hasGap() && this._perimCompress) {
+//        v = PVectorD.add(p._gap.get(0)._loc,p._gap.get(1)._loc).mult(0.5);
+//        v = PVectorD.sub(v,p._loc).mult(this._kg);
+//      } else {
+      v = PVectorD.sub(n._loc,p._loc);
+//      }
       vcb.add(v);
       if (this._loggingN && this._loggingP) {
         nData += plog._counter + "," + p.logString(_logMin) + "," + n.logString(_logMin) + "," + v.x + "," + v.y + "," + v.z + "," + v.mag() + "," + distance + "\n";
@@ -120,7 +129,23 @@ class Model7 extends PSystem {
     if (p._nbr.size() > 0) {
       vcb.div(p._nbr.size());
     }
+    vcb.mult(this._kc);
     return vcb;
+  }
+
+  PVectorD gap(Particle p){
+    PVectorD vgb = new PVectorD(0,0,0);
+    PVectorD v = new PVectorD(0,0,0);
+    for (int i=0; i < p._gapStart.size(); i++) {
+        v = PVectorD.add(p._gapStart.get(i)._loc,p._gapEnd.get(i)._loc).mult(0.5);
+        v = PVectorD.sub(v,p._loc);
+        vgb.add(v);
+    }
+    if (p._gapStart.size() > 0) {
+      vgb.div(p._gapStart.size());
+    }
+    vgb.mult(this._kg);
+    return vgb;
   }
 
   PVectorD repulsion(Particle p) {

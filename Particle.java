@@ -17,7 +17,8 @@ class Particle {
   PVectorD _resultant;
   ArrayList<Particle> _nbr = new ArrayList<Particle>();  //ACTUAL NEIGHBOURS FOR COHESION/REPULSION
   ArrayList<Destination> _destinations = new ArrayList<Destination>();
-  ArrayList<Particle> _gap = new ArrayList<Particle>(); 
+  ArrayList<Particle> _gapStart = new ArrayList<Particle>(); 
+  ArrayList<Particle> _gapEnd = new ArrayList<Particle>(); 
   int _id;
   double _size = 10.0;
   double _mass = 1.0;
@@ -161,7 +162,7 @@ class Particle {
 /** 
 * Checks gap Array to see if has been populated by the neighbour check.
 */
-    if(this._gap.size() > 0) {
+    if(this._gapStart.size() > 0) {
       return true;
     } else {
       return false;
@@ -275,7 +276,8 @@ class Particle {
     double angle;
     double dist;
     this._isPerim = false;
-    this._gap.clear();
+    this._gapStart.clear();
+    this._gapEnd.clear();
     if (this._nbr.size() < 3) {
       this._isPerim = true;
       return;
@@ -308,9 +310,9 @@ class Particle {
         if ( dist > this._Cb || angle > 180) {
           this._isPerim = true;
 //POPULATE GAP AGENTS
-          this._gap.clear();
-          this._gap.add(this._nbr.get(i));          
-          this._gap.add(this._nbr.get(i+1));
+//          this._gap.clear();
+          this._gapStart.add(this._nbr.get(i));          
+          this._gapEnd.add(this._nbr.get(i+1));
         }
       }
       angle = calcAngle(this._nbr.get(this._nbr.size()-1)._sweepAngle,this._nbr.get(0)._sweepAngle);
@@ -318,9 +320,9 @@ class Particle {
       if (dist > this._Cb  || angle > 180.0) {
         this._isPerim = true;
 //POPULATE GAP AGENTS
-        this._gap.clear();
-        this._gap.add(this._nbr.get(0));          
-        this._gap.add(this._nbr.get(this._nbr.size()-1));
+//        this._gap.clear();
+        this._gapStart.add(this._nbr.get(0));          
+        this._gapEnd.add(this._nbr.get(this._nbr.size()-1));
       }
     }
   }  
