@@ -23,7 +23,7 @@
     "stability_factor": 0,
     "kc": 0.15000000596046448,
     "kd": 0,
-    "kg": 5,
+    "kg": 20,
     "cb": 3
   },
   "agents": {"coords": [

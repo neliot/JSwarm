@@ -94,8 +94,6 @@ public class JSwarm {
         experiment(system,0,kg);
     }
   }
-
-
   static public void main(String[] args) {
     PSystem system = null;
     String _NAME = "PSwarm";

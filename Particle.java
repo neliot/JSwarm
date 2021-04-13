@@ -260,10 +260,11 @@ class Particle {
   }
 
   public double calcAngle(double start, double end) {
-    if (start < end) {
-      start += 360;
+    double diff = start - end;
+    if (diff < 0) {
+      diff += (2 * Math.PI);
     }
-    return Math.abs(start - end);
+    return Math.abs(diff);
   }
 
   public void checkNbrs() {
@@ -285,7 +286,7 @@ class Particle {
 //CALCULATE SWEEP ANGLE
     for (Particle n : this._nbr) {
       PVectorD head = PVectorD.sub(n._loc,this._loc);
-      n._sweepAngle = Math.toDegrees(Math.atan2(head.y,head.x))+180;
+      n._sweepAngle = Math.atan2(head.y,head.x);
     }    
 
 //BUBBLE SORT ARRAYLIST ON sweepAngle
@@ -300,14 +301,13 @@ class Particle {
         }
       }
     }
-//REMOVE CROSSING AGENTS
 
 //SWEEP THE ANGLES 
     if (this._nbr.size() > 0) {
       for (int i = 0; i < this._nbr.size()-1; i++) {
         angle = calcAngle(this._nbr.get(i)._sweepAngle, this._nbr.get(i+1)._sweepAngle);
         dist = PVectorD.dist(this._nbr.get(i)._loc, this._nbr.get(i+1)._loc);
-        if ( dist > this._Cb || angle > 180) {
+        if ( dist > this._Cb || angle > Math.PI) {
           this._isPerim = true;
 //POPULATE GAP AGENTS
 //          this._gap.clear();
@@ -317,7 +317,7 @@ class Particle {
       }
       angle = calcAngle(this._nbr.get(this._nbr.size()-1)._sweepAngle,this._nbr.get(0)._sweepAngle);
       dist = PVectorD.dist(this._nbr.get(0)._loc,this._nbr.get(this._nbr.size()-1)._loc); 
-      if (dist > this._Cb  || angle > 180.0) {
+      if (dist > this._Cb  || angle > Math.PI) {
         this._isPerim = true;
 //POPULATE GAP AGENTS
 //        this._gap.clear();

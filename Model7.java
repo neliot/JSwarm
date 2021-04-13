@@ -156,19 +156,14 @@ class Model7 extends PSystem {
 */
     PVectorD vrb = new PVectorD(0,0,0);
     PVectorD v = new PVectorD(0,0,0);
-    double dist = 0.0;
     double distance = 0.0;
+    int count = 0;
     String nData = "";
     for(Particle n : p._nbr) {
-      // IF compress permeter then reduce repulsion field if both agents are perimeter agents.
-      if (this._perimCompress && p._isPerim && n._isPerim) { 
-        dist = p._Rb * this._pr;
-      } else {
-        dist = p._Rb;
-      }
       distance = PVectorD.dist(p._loc,n._loc);
-      if (distance <= dist & p != n) {
-        v = PVectorD.sub(p._loc, n._loc).setMag(p._Rb- distance).mult(this._kr);
+      if (distance <= p._Rb & p != n) {
+        count++;
+        v = PVectorD.sub(p._loc, n._loc).setMag(p._Rb - distance);
         vrb.add(v);
         if (this._loggingN && this._loggingP) {
           nData += plog._counter + "," + p.logString(this._logMin) + "," + n.logString(this._logMin) + "," + v.x + "," + v.y + "," + v.z + "," + v.mag() + "\n";
@@ -179,7 +174,10 @@ class Model7 extends PSystem {
       nRlog.dump(nData);
       nRlog.clean();
     }
-    return vrb;
+    if (count > 0) {
+      vrb.div(count);
+    }
+    return vrb.mult(this._kr);
   }
 
   PVectorD direction(Particle p) {
