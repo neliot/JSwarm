@@ -1,9 +1,12 @@
+DOCUMENTATION for org.json:
+  https://stleary.github.io/JSON-java/
+
 TO COMPILE
-javac -cp .\lib\org.json.jar PNRG.java PVectorD.java Particle.java Obstacle.java Destination.java Logger.java JSwarm.java PSystem.java Model1.java
+  javac -cp ./lib/org.json.jar PNRG.java PVectorD.java Particle.java Obstacle.java Destination.java Logger.java JSwarm.java PSystem.java Model1.java
+
+or just
+  javac -cp ./lib/org.json.jar *.java
 
 TO RUN
-Linux -  java -cp ".:.\lib\org.json.jar" JSwarm
-Windows -  java -cp ".;.\lib\org.json.jar" JSwarm
-
-JUPYTER NOTEBOOK
-... a mystery as ever
+  Linux -  java -cp ".:./lib/org.json.jar" JSwarm
+  [Windows -  java -cp ".;.\lib\org.json.jar" JSwarm]

@@ -15,9 +15,10 @@ class Particle {
   PVectorD _loc;
   PVectorD _nextLocation;
   PVectorD _resultant;
-  ArrayList<Particle> _nbr = new ArrayList<Particle>(); 
+  ArrayList<Particle> _nbr = new ArrayList<Particle>();  //ACTUAL NEIGHBOURS FOR COHESION/REPULSION
   ArrayList<Destination> _destinations = new ArrayList<Destination>();
-  ArrayList<Particle> _gap = new ArrayList<Particle>(); 
+  ArrayList<Particle> _gapStart = new ArrayList<Particle>(); 
+  ArrayList<Particle> _gapEnd = new ArrayList<Particle>(); 
   int _id;
   double _size = 10.0;
   double _mass = 1.0;
@@ -161,7 +162,7 @@ class Particle {
 /** 
 * Checks gap Array to see if has been populated by the neighbour check.
 */
-    if(this._gap.size() > 0) {
+    if(this._gapStart.size() > 0) {
       return true;
     } else {
       return false;
@@ -233,9 +234,9 @@ class Particle {
 * Updates the position of the particle based on the _resultant.
 */
     // Copy values rather than object! Lets help the garbage collector out!
-    this._loc.x = rtodp(_nextLocation.x,6);
-    this._loc.y = rtodp(_nextLocation.y,6);
-    this._loc.z = rtodp(_nextLocation.z,6);
+    this._loc.x = _nextLocation.x;
+    this._loc.y = _nextLocation.y;
+    this._loc.z = _nextLocation.z;
   }
 
   public void reset() {
@@ -256,14 +257,14 @@ class Particle {
         this._nbr.add(n);
       }
     }
-    checkNbrs();
   }
 
   public double calcAngle(double start, double end) {
-    if (start < end) {
-      start += 360;
+    double diff = start - end;
+    if (diff < 0) {
+      diff += (2 * Math.PI);
     }
-    return Math.abs(start - end);
+    return Math.abs(diff);
   }
 
   public void checkNbrs() {
@@ -276,17 +277,18 @@ class Particle {
     double angle;
     double dist;
     this._isPerim = false;
-    this._gap.clear();
-    if (this._nbr.size() < 4) {
+    this._gapStart.clear();
+    this._gapEnd.clear();
+    if (this._nbr.size() < 3) {
       this._isPerim = true;
       return;
     }
 //CALCULATE SWEEP ANGLE
-    for (Particle n : _nbr) {
+    for (Particle n : this._nbr) {
       PVectorD head = PVectorD.sub(n._loc,this._loc);
-      n._sweepAngle = Math.toDegrees(Math.atan2(head.y,head.x))+180;
+      n._sweepAngle = Math.atan2(head.y,head.x);
     }    
-  
+
 //BUBBLE SORT ARRAYLIST ON sweepAngle
     for (int i = 0; i < this._nbr.size(); i++) {
       for (int j = 0; j < this._nbr.size()-i-1; j++) {
@@ -298,28 +300,29 @@ class Particle {
             this._nbr.set(j+1,temp);
         }
       }
-    }    
+    }
+
 //SWEEP THE ANGLES 
-    if (_nbr.size() > 0) {
+    if (this._nbr.size() > 0) {
       for (int i = 0; i < this._nbr.size()-1; i++) {
         angle = calcAngle(this._nbr.get(i)._sweepAngle, this._nbr.get(i+1)._sweepAngle);
         dist = PVectorD.dist(this._nbr.get(i)._loc, this._nbr.get(i+1)._loc);
-        if ( dist > this._Cb || angle > 180) {
+        if ( dist > this._Cb || angle > Math.PI) {
           this._isPerim = true;
 //POPULATE GAP AGENTS
-          this._gap.clear();
-          this._gap.add(this._nbr.get(i));          
-          this._gap.add(this._nbr.get(i+1));
+//          this._gap.clear();
+          this._gapStart.add(this._nbr.get(i));          
+          this._gapEnd.add(this._nbr.get(i+1));
         }
       }
       angle = calcAngle(this._nbr.get(this._nbr.size()-1)._sweepAngle,this._nbr.get(0)._sweepAngle);
       dist = PVectorD.dist(this._nbr.get(0)._loc,this._nbr.get(this._nbr.size()-1)._loc); 
-      if (dist > _Cb  || angle > 180.0) {
+      if (dist > this._Cb  || angle > Math.PI) {
         this._isPerim = true;
 //POPULATE GAP AGENTS
-        this._gap.clear();
-        this._gap.add(this._nbr.get(0));          
-        this._gap.add(this._nbr.get(this._nbr.size()-1));
+//        this._gap.clear();
+        this._gapStart.add(this._nbr.get(0));          
+        this._gapEnd.add(this._nbr.get(this._nbr.size()-1));
       }
     }
   }  
