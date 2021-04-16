@@ -1,4 +1,4 @@
 csv
 .vscode
 .ipynb_checkpoints
-/Model7.class
+*.stat

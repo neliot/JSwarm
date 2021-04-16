@@ -17,29 +17,32 @@
 *   You should have received a copy of the GNU General Public License
 *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ****************************************************************************/
+
+package swarm;
+
 import java.io.FileInputStream;  
 
 public class JSwarm {
   
-  static void experiment(PSystem system) {
+  public static void experiment(PSystem system) {
     system._loggingP = true;
     system._loggingN = true;
     system._run = true;
     int iterations = Integer.parseInt(system.modelProperties.getProperty("iterations"));
-    System.out.println("Iterations:" + iterations);
-    System.out.println("Cb:"+system._Cb);
-    System.out.println("Rb:"+system._Rb);
-    System.out.println("kc:"+system._kc);
-    System.out.println("kr:"+system._kr);
-    System.out.println("pc:"+system._pc);
-    System.out.println("pr:"+system._pr);
-    System.out.println("Compress:"+system._perimCompress);
-    System.out.println("Speed:"+system._speed);
+//    System.out.println("Iterations:" + iterations);
+//    System.out.println("Cb:"+system._Cb);
+//    System.out.println("Rb:"+system._Rb);
+//    System.out.println("kc:"+system._kc);
+//    System.out.println("kr:"+system._kr);
+//    System.out.println("pc:"+system._pc);
+//    System.out.println("pr:"+system._pr);
+//    System.out.println("Compress:"+system._perimCompress);
+//    System.out.println("Speed:"+system._speed);
     for(int i = 0; i < iterations; i++) {
       system.update();
       system.moveReset();
     }
-    System.out.println("Complete");
+//    System.out.println("Complete");
     system.plog.quit();
     system.nClog.quit();
     system.nRlog.quit();
