@@ -8,8 +8,10 @@
 
 package ec.app.siab;
 
+import java.util.*;
 import java.io.*;
 import org.json.*;
+import com.opencsv.*;
 import ec.*;
 import ec.simple.*;
 import ec.vector.*;
@@ -74,6 +76,38 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
       e.printStackTrace();
     }
     JSwarm.experiment(system);
+    
+    try {
+      FileReader             fr      = new FileReader("data/csv/exp.p.csv");
+      CSVReaderHeaderAware   cr      = new CSVReaderHeaderAware(fr);
+      Map<String,String>     values  = null;
+      double                 sumImag = 0.0;
+      int                    numIds  = 0;
+      while ((values = cr.readMap()) != null) {
+        int    step = Integer.parseInt(values.get("STEP"));
+        step--; // restore count from zero
+        int    id   = Integer.parseInt(values.get("ID"));
+        double imag = Double.parseDouble(values.get("IMAG"));
+        if ((step > 0) && (id == 0)) {
+          System.out.print("STEP: "+step);
+          System.out.println("; Mean IMAG: "+sumImag/numIds);
+          sumImag = 0.0;
+          numIds  = 0;
+        }
+        sumImag += imag;
+        numIds++;
+        //System.out.print("STEP: "+step);
+        //System.out.print("; ID: "+id);
+        //System.out.println("; IMAG: "+imag);
+      }
+      
+      // Next job is looking at windowed mean and variance over ten steps say
+
+      cr.close();
+      fr.close();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
 
     if (!(ind2.fitness instanceof SimpleFitness))
       state.output.fatal("Whoa!  It's not a SimpleFitness!!!",null);
@@ -121,4 +155,5 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
   public static final double SPEED_MIN   = 0.04;
   public static final double SPEED_MAX   = 0.06;
   public static final double CB_MIN_MULT = 1.01;
+  public static final double IMAG_WINDOW = 10;
 }

@@ -8,5 +8,7 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/org.json.jar"/>
 	<classpathentry kind="lib" path="ecj.24.jar"/>
+	<classpathentry kind="lib" path="opencsv-5.4.jar"/>
+	<classpathentry kind="lib" path="commons-lang3-3.12.0.jar"/>
 	<classpathentry kind="output" path=""/>
 </classpath>
