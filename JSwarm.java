@@ -112,17 +112,17 @@ public class JSwarm {
     System.out.println("==========================");
     System.out.println(system._model);
     System.out.println("==========================");
-    runprpc(system);
-
-    system = new Model7();
-    System.out.println("==========================");
-    System.out.println(system._model);
-    System.out.println("==========================");
-    rungap(system);
-    System.out.println("==========================");
-    System.out.println("Complete.");
+//    runprpc(system);
+//
+//    system = new Model7();
+//    System.out.println("==========================");
+//    System.out.println(system._model);
+//    System.out.println("==========================");
+//    rungap(system);
+//    System.out.println("==========================");
+//    System.out.println("Complete.");
 
 //  SINGLE RUN FROM JSON FILE
-//    experiment(system);
+    experiment(system);
   }
 }

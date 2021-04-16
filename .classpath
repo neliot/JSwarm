@@ -7,5 +7,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/org.json.jar"/>
+	<classpathentry kind="lib" path="ecj.24.jar"/>
 	<classpathentry kind="output" path=""/>
 </classpath>
