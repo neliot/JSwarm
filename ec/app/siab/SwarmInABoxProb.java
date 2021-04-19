@@ -12,6 +12,7 @@ import java.util.*;
 import java.io.*;
 import org.json.*;
 import com.opencsv.*;
+import org.apache.commons.math3.stat.descriptive.moment.*;
 import ec.*;
 import ec.simple.*;
 import ec.vector.*;
@@ -50,7 +51,7 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
     
     assert cb > rb : "cb > rb";
     
-    System.out.format("[%.3f,%.3f,%.3f,%.3f,%.3f]\n", kc, kr, rb, cb, speed);
+    System.out.format("[%.3f,%.3f,%.3f,%.3f,%.3f] ", kc, kr, rb, cb, speed);
     
     PSystem               system = new Model1();
     ByteArrayOutputStream baos   = new ByteArrayOutputStream();
@@ -77,48 +78,62 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
     }
     JSwarm.experiment(system);
     
+    double varImag = 0.0;
     try {
-      FileReader             fr      = new FileReader("data/csv/exp.p.csv");
-      CSVReaderHeaderAware   cr      = new CSVReaderHeaderAware(fr);
-      Map<String,String>     values  = null;
-      double                 sumImag = 0.0;
-      int                    numIds  = 0;
+      FileReader             fr        = new FileReader("data/csv/exp.p.csv");
+      CSVReaderHeaderAware   cr        = new CSVReaderHeaderAware(fr);
+      Map<String,String>     values    = null;
+      int                    step      = 0;
+      double                 sumImag   = 0.0;
+      int                    numIds    = 0;
+      int                    index     = 0;
+      int                    nextIndex;
+      double[]               xs        = new double[IMAG_WINDOW];
+      Arrays.fill(xs,  0.0);
+      Mean                   aMean     = new Mean();
+      Variance               aVariance = new Variance();
       while ((values = cr.readMap()) != null) {
-        int    step = Integer.parseInt(values.get("STEP"));
+        step        = Integer.parseInt(values.get("STEP"));
         step--; // restore count from zero
         int    id   = Integer.parseInt(values.get("ID"));
         double imag = Double.parseDouble(values.get("IMAG"));
         if ((step > 0) && (id == 0)) {
-          System.out.print("STEP: "+step);
-          System.out.println("; Mean IMAG: "+sumImag/numIds);
-          sumImag = 0.0;
-          numIds  = 0;
+          index     = (index + 1) % IMAG_WINDOW;
+          xs[index] = sumImag/numIds;
+          sumImag   = 0.0;
+          numIds    = 0;
+          //System.out.print("STEP: "+step);
+          //System.out.print("; Mean IMAG: "+aMean.evaluate(xs, 0, xs.length));
+          varImag = aVariance.evaluate(xs, 0, xs.length);
+          //System.out.println("; Var IMAG: "+varImag);
         }
         sumImag += imag;
         numIds++;
-        //System.out.print("STEP: "+step);
-        //System.out.print("; ID: "+id);
-        //System.out.println("; IMAG: "+imag);
       }
-      
-      // Next job is looking at windowed mean and variance over ten steps say
-
+      index     = (index + 1) % IMAG_WINDOW;
+      xs[index] = sumImag/numIds;
+      //System.out.print("STEP: "+(++step));
+      //System.out.print("; Mean IMAG: "+aMean.evaluate(xs, 0, xs.length));
+      varImag = aVariance.evaluate(xs, 0, xs.length);
+      //System.out.println("; Var IMAG: "+varImag);
       cr.close();
       fr.close();
     } catch (Exception e) {
       e.printStackTrace();
     }
+    
+    System.out.println(""+varImag);
 
     if (!(ind2.fitness instanceof SimpleFitness))
       state.output.fatal("Whoa!  It's not a SimpleFitness!!!",null);
     //double rawfit = NetCost.getInstance().netCost(genotype);
-    double rawfit = 1.0;
+    double rawfit = varImag;
     ((SimpleFitness)ind2.fitness).setFitness(state,
         /// ...the fitness...
         -rawfit,
         ///1.0/(1.0 + rawfit),
         ///... is the individual ideal?  Indicate here...
-        false);
+        (rawfit == 0.0) ? true : false);
     ind2.evaluated = true;
   }
 
@@ -155,5 +170,5 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
   public static final double SPEED_MIN   = 0.04;
   public static final double SPEED_MAX   = 0.06;
   public static final double CB_MIN_MULT = 1.01;
-  public static final double IMAG_WINDOW = 10;
+  public static final int    IMAG_WINDOW = 10;
 }
