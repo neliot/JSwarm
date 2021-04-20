@@ -30,52 +30,8 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
     if (!(ind instanceof BitVectorIndividual))
       state.output.fatal("Whoa!  It's not a BitVectorIndividual!!!",null);
 
-    BitVectorIndividual ind2 = (BitVectorIndividual)ind;
-
-    //		StringBuffer buf = new StringBuffer();
-    //		for(int x=0; x<ind2.genome.length; x++)
-    //	    buf.append(ind2.genome[x] ? "1" : "0");
-    //		String genotype = buf.toString();
-
-    Object[] pieces = new Object[5];
-    int[]    points = new int[] {10, 20, 30, 40};
-    ind2.split(points, pieces);
-    double kc    = scale(boolArrayToInt((boolean[])pieces[KC]), KC_MIN, KC_MAX, STEPS);
-    double kr    = scale(boolArrayToInt((boolean[])pieces[KR]), KR_MIN, KR_MAX, STEPS);
-    double cb    = scale(boolArrayToInt((boolean[])pieces[RB]), RB_MIN, RB_MAX, STEPS);
-    double rb    = scale(boolArrayToInt((boolean[])pieces[CB]), CB_MIN, CB_MAX, STEPS);
-    double speed = scale(boolArrayToInt((boolean[])pieces[SPEED]), SPEED_MIN, SPEED_MAX, STEPS);
-
-    if (cb <= rb)
-      cb = rb * CB_MIN_MULT;
-    
-    assert cb > rb : "cb > rb";
-    
-    System.out.format("[%.3f,%.3f,%.3f,%.3f,%.3f] ", kc, kr, rb, cb, speed);
-    
-    PSystem               system = new Model1();
-    ByteArrayOutputStream baos   = new ByteArrayOutputStream();
-    PrintWriter           pw     = new PrintWriter(baos);
-    system.saveSwarmJSON(pw);
-    //System.out.println(baos);
-    try {
-      JSONObject json   = new JSONObject(baos.toString());
-      JSONObject params = json.getJSONObject("params");
-      //System.out.format("[%.3f,%.3f,%.3f,%.3f,%.3f]\n",
-      //    params.getDouble("kc"), params.getDouble("kr"), params.getDouble("rb"), params.getDouble("cb"), params.getDouble("speed"));
-      params.put("kc", kc);
-      params.put("kr", kr);
-      params.put("rb", rb);
-      params.put("cb", cb);
-      params.put("speed", speed);
-      //json.put("params", params);
-      //params = json.getJSONObject("params");
-      //System.out.format("[%.3f,%.3f,%.3f,%.3f,%.3f]\n",
-      //    params.getDouble("kc"), params.getDouble("kr"), params.getDouble("rb"), params.getDouble("cb"), params.getDouble("speed"));
-      system.load(json);
-    } catch (JSONException e) {
-      e.printStackTrace();
-    }
+    BitVectorIndividual ind2   = (BitVectorIndividual)ind;
+    PSystem             system = indToSystem(ind2);
     JSwarm.experiment(system);
     
     double varImag = 0.0;
@@ -102,27 +58,21 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
           xs[index] = sumImag/numIds;
           sumImag   = 0.0;
           numIds    = 0;
-          //System.out.print("STEP: "+step);
-          //System.out.print("; Mean IMAG: "+aMean.evaluate(xs, 0, xs.length));
           varImag = aVariance.evaluate(xs, 0, xs.length);
-          //System.out.println("; Var IMAG: "+varImag);
         }
         sumImag += imag;
         numIds++;
       }
       index     = (index + 1) % IMAG_WINDOW;
       xs[index] = sumImag/numIds;
-      //System.out.print("STEP: "+(++step));
-      //System.out.print("; Mean IMAG: "+aMean.evaluate(xs, 0, xs.length));
-      varImag = aVariance.evaluate(xs, 0, xs.length);
-      //System.out.println("; Var IMAG: "+varImag);
+      varImag   = aVariance.evaluate(xs, 0, xs.length);
       cr.close();
       fr.close();
     } catch (Exception e) {
       e.printStackTrace();
     }
     
-    System.out.println(""+varImag);
+    //System.out.println(""+varImag);
 
     if (!(ind2.fitness instanceof SimpleFitness))
       state.output.fatal("Whoa!  It's not a SimpleFitness!!!",null);
@@ -137,7 +87,7 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
     ind2.evaluated = true;
   }
 
-  int boolArrayToInt(boolean[] arr) {
+  static int boolArrayToInt(boolean[] arr) {
     assert arr != null : "arr cannot be null";
     assert arr.length <= 31 : "arr not too long (length <= 31)";
     int n = 0;
@@ -146,11 +96,48 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
     return n;
   }
 
-  double scale(int factor, double min, double max, int steps) {
+  static double scale(int factor, double min, double max, int steps) {
     assert max > min : "max > min";
     assert factor >= 0 : "factor >= 0";
     assert steps > 0 : "steps > 0";
     return min + (factor*(max-min))/steps;
+  }
+  
+  static PSystem indToSystem(BitVectorIndividual ind) {
+    assert ind != null : "ind cannot be null";
+    Object[] pieces = new Object[5];
+    int[]    points = new int[] {10, 20, 30, 40};
+    ind.split(points, pieces);
+    double kc    = scale(boolArrayToInt((boolean[])pieces[KC]), KC_MIN, KC_MAX, STEPS);
+    double kr    = scale(boolArrayToInt((boolean[])pieces[KR]), KR_MIN, KR_MAX, STEPS);
+    double cb    = scale(boolArrayToInt((boolean[])pieces[RB]), RB_MIN, RB_MAX, STEPS);
+    double rb    = scale(boolArrayToInt((boolean[])pieces[CB]), CB_MIN, CB_MAX, STEPS);
+    double speed = scale(boolArrayToInt((boolean[])pieces[SPEED]), SPEED_MIN, SPEED_MAX, STEPS);
+
+    if (cb <= rb)
+      cb = rb * CB_MIN_MULT;
+    
+    assert cb > rb : "cb > rb";
+    
+    //System.out.format("[%.3f,%.3f,%.3f,%.3f,%.3f] ", kc, kr, rb, cb, speed);
+    
+    PSystem               system = new Model1();
+    ByteArrayOutputStream baos   = new ByteArrayOutputStream();
+    PrintWriter           pw     = new PrintWriter(baos);
+    system.saveSwarmJSON(pw);
+    try {
+      JSONObject json   = new JSONObject(baos.toString());
+      JSONObject params = json.getJSONObject("params");
+      params.put("kc", kc);
+      params.put("kr", kr);
+      params.put("rb", rb);
+      params.put("cb", cb);
+      params.put("speed", speed);
+      system.load(json);
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
+    return system;
   }
 
   public static final int    STEPS       = 1024;

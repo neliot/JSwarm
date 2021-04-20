@@ -9,7 +9,7 @@ init		= ec.simple.SimpleInitializer
 finish		= ec.simple.SimpleFinisher
 breed		= ec.simple.SimpleBreeder
 eval		= ec.simple.SimpleEvaluator
-stat		= ec.simple.SimpleStatistics
+stat		= ec.app.siab.SwarmInABoxStatistics
 exch		= ec.simple.SimpleExchanger
 
 generations		= 50
@@ -19,6 +19,7 @@ checkpoint-prefix	= ec
 checkpoint-modulo	= 1
 
 stat.file		= $out.stat
+stat.json       = $out.json
 
 pop.subpops		= 1
 pop.subpop.0		= ec.Subpopulation
