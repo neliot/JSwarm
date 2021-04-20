@@ -40,43 +40,36 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
       CSVReaderHeaderAware   cr        = new CSVReaderHeaderAware(fr);
       Map<String,String>     values    = null;
       int                    step      = 0;
-      double                 sumImag   = 0.0;
-      int                    numIds    = 0;
-      int                    index     = 0;
-      int                    nextIndex;
-      double[]               xs        = new double[IMAG_WINDOW];
-      Arrays.fill(xs,  0.0);
-      Mean                   aMean     = new Mean();
+      Vector<Double>         imags     = new Vector<>();
       Variance               aVariance = new Variance();
       while ((values = cr.readMap()) != null) {
         step        = Integer.parseInt(values.get("STEP"));
         step--; // restore count from zero
         int    id   = Integer.parseInt(values.get("ID"));
         double imag = Double.parseDouble(values.get("IMAG"));
+        imags.add(imag);
         if ((step > 0) && (id == 0)) {
-          index     = (index + 1) % IMAG_WINDOW;
-          xs[index] = sumImag/numIds;
-          sumImag   = 0.0;
-          numIds    = 0;
-          varImag = aVariance.evaluate(xs, 0, xs.length);
+          double[] imagsd = new double[imags.size()];
+          for (int i=0; i<imags.size(); i++)
+            imagsd[i] = imags.get(i);
+          varImag = aVariance.evaluate(imagsd, 0, imags.size());
+          imags.clear();
         }
-        sumImag += imag;
-        numIds++;
       }
-      index     = (index + 1) % IMAG_WINDOW;
-      xs[index] = sumImag/numIds;
-      varImag   = aVariance.evaluate(xs, 0, xs.length);
+      double[] imagsd = new double[imags.size()];
+      for (int i=0; i<imags.size(); i++)
+        imagsd[i] = imags.get(i);
+      varImag = aVariance.evaluate(imagsd, 0, imags.size());
       cr.close();
       fr.close();
     } catch (Exception e) {
       e.printStackTrace();
     }
     
-    //System.out.println(""+varImag);
+    System.out.println(""+varImag);
 
     if (!(ind2.fitness instanceof SimpleFitness))
       state.output.fatal("Whoa!  It's not a SimpleFitness!!!",null);
-    //double rawfit = NetCost.getInstance().netCost(genotype);
     double rawfit = varImag;
     ((SimpleFitness)ind2.fitness).setFitness(state,
         /// ...the fitness...
@@ -119,7 +112,7 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
     
     assert cb > rb : "cb > rb";
     
-    //System.out.format("[%.3f,%.3f,%.3f,%.3f,%.3f] ", kc, kr, rb, cb, speed);
+    System.out.format("[%.3f,%.3f,%.3f,%.3f,%.3f] ", kc, kr, rb, cb, speed);
     
     PSystem               system = new Model1();
     ByteArrayOutputStream baos   = new ByteArrayOutputStream();
