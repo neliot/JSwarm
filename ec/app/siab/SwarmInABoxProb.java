@@ -32,45 +32,13 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
 
     BitVectorIndividual ind2   = (BitVectorIndividual)ind;
     PSystem             system = indToSystem(ind2);
-    JSwarm.experiment(system);
+    JSwarm.experiment(system); 
+    double              rawfit = fitness(system);
     
-    double varImag = 0.0;
-    try {
-      FileReader             fr        = new FileReader("data/csv/exp.p.csv");
-      CSVReaderHeaderAware   cr        = new CSVReaderHeaderAware(fr);
-      Map<String,String>     values    = null;
-      int                    step      = 0;
-      Vector<Double>         imags     = new Vector<>();
-      Variance               aVariance = new Variance();
-      while ((values = cr.readMap()) != null) {
-        step        = Integer.parseInt(values.get("STEP"));
-        step--; // restore count from zero
-        int    id   = Integer.parseInt(values.get("ID"));
-        double imag = Double.parseDouble(values.get("IMAG"));
-        imags.add(imag);
-        if ((step > 0) && (id == 0)) {
-          double[] imagsd = new double[imags.size()];
-          for (int i=0; i<imags.size(); i++)
-            imagsd[i] = imags.get(i);
-          varImag = aVariance.evaluate(imagsd, 0, imags.size());
-          imags.clear();
-        }
-      }
-      double[] imagsd = new double[imags.size()];
-      for (int i=0; i<imags.size(); i++)
-        imagsd[i] = imags.get(i);
-      varImag = aVariance.evaluate(imagsd, 0, imags.size());
-      cr.close();
-      fr.close();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    
-    System.out.println(""+varImag);
+    System.out.println(""+rawfit);
 
     if (!(ind2.fitness instanceof SimpleFitness))
       state.output.fatal("Whoa!  It's not a SimpleFitness!!!",null);
-    double rawfit = varImag;
     ((SimpleFitness)ind2.fitness).setFitness(state,
         /// ...the fitness...
         -rawfit,
@@ -131,6 +99,44 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
       e.printStackTrace();
     }
     return system;
+  }
+  
+  static double fitness(PSystem system) {
+    assert system != null : "system cannot be null";
+    double rawfit = 0.0;
+    try {
+      FileReader             fr        = new FileReader("data/csv/exp.p.csv");
+      CSVReaderHeaderAware   cr        = new CSVReaderHeaderAware(fr);
+      Map<String,String>     values    = null;
+      int                    step      = 0;
+      Vector<Double>         imags     = new Vector<>();
+      Variance               aVariance = new Variance();
+      double                 varImag   = 0.0;
+      while ((values = cr.readMap()) != null) {
+        step        = Integer.parseInt(values.get("STEP"));
+        step--; // restore count from zero
+        int    id   = Integer.parseInt(values.get("ID"));
+        double imag = Double.parseDouble(values.get("IMAG"));
+        imags.add(imag);
+        if ((step > 0) && (id == 0)) {
+          double[] imagsd = new double[imags.size()];
+          for (int i=0; i<imags.size(); i++)
+            imagsd[i] = imags.get(i);
+          varImag = aVariance.evaluate(imagsd, 0, imags.size());
+          imags.clear();
+        }
+      }
+      double[] imagsd = new double[imags.size()];
+      for (int i=0; i<imags.size(); i++)
+        imagsd[i] = imags.get(i);
+      varImag = aVariance.evaluate(imagsd, 0, imags.size());
+      rawfit = varImag;
+      cr.close();
+      fr.close();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return rawfit;
   }
 
   public static final int    STEPS       = 1024;

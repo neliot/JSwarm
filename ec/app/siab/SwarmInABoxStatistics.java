@@ -25,8 +25,11 @@ public class SwarmInABoxStatistics extends SimpleStatistics {
   	
   	if (doFinal) {
   		try {
-  			PrintWriter pw = new PrintWriter(filename);
-  			PSystem system = SwarmInABoxProb.indToSystem((BitVectorIndividual)best_of_run[0]); // assume one sub population
+  			PrintWriter pw     = new PrintWriter(filename);
+  			PSystem     system = SwarmInABoxProb.indToSystem((BitVectorIndividual)best_of_run[0]); // assume one sub population
+  	    JSwarm.experiment(system); 
+  	    double      rawfit = SwarmInABoxProb.fitness(system);
+  	    System.out.println(""+rawfit);
   			system.saveSwarmJSON(pw);
   			pw.close();
   		} catch (Exception e) {
