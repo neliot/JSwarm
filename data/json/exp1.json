@@ -11,6 +11,7 @@
   ]},
   "params": {
     "pr": 1,
+    "pkr": 0.5,
     "scaling": "linear",
     "ko": 1000,
     "kr": 50,

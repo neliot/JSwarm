@@ -21,6 +21,7 @@
   * java.util.Random implementation has a default seed too, but the doc doesn't
   * specify it in detail.
   */ 
+
 class PRNG {
   private int  bitSz = 48;          //Ref: wiki on Linear PRNG,
   private long m = 1L << bitSz,     //     doc for java.util.Random class

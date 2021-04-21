@@ -7,12 +7,12 @@
 import java.io.PrintWriter; 
 import java.io.File;
 
-class Logger {
-  PrintWriter _output = null;
-  String _filename;
-  int _counter = 1;
+public class Logger {
+  public PrintWriter _output = null;
+  public String _filename;
+  public int _counter = 1;
   
-  Logger(String filename) {
+  public Logger(String filename) {
 /** 
 * Sets up logger
 * 

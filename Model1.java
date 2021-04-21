@@ -1,16 +1,35 @@
-class Model1 extends PSystem {
+
+public class Model1 extends PSystem {
   Model1() {
-    super("Linear Vector","1");
+    super("Linear Vector + Void Reduction","1");
   }
 
-  void init() {};
+  public void init() {
+    if (this._compression == 1 && this._pkr > 1) {
+      System.out.println("Outer compression must have pkr <= 1");
+      System.exit(-1);
+    }
+    if (this._compression == 2 && this._pkr < 1) {
+      System.out.println("Inner compression must have pkr >= 1");
+      System.exit(-1);
+    }
+  };
 
-  void populate() {
+  public void populate() {
+    boolean used = false;
+    double nextX = 0;
+    double nextY = 0;
     PRNG rand = new PRNG(_seed);
     for(int i = 0; i < this._swarmSize; i++) {
       try {
+        used = true;
+        while (used) {
+          nextX = _grid/2 - (rand.nextFloat() * _grid);
+          nextY = _grid/2 - (rand.nextFloat() * _grid);
+          used = checkUsed(nextX,nextY);
+        }
         // create agent in centred quartile.
-        S.add(new Particle(Particle._nextParticleId++,_grid/2 - rand.nextInt(_grid),(float)_grid/2 - rand.nextInt(_grid),0.0,this._Cb,this._Rb,this._speed));
+        S.add(new Particle(Particle._nextParticleId++,nextX,nextY,0.0,this._Cb,this._Rb,this._speed));
       } catch (Exception e) {
         System.out.println(e);
         System.exit(-1);
@@ -18,7 +37,7 @@ class Model1 extends PSystem {
     }
   }
 
-  void update() {
+  public void update() {
 /** 
 * Update system - Updates particle positions.
 */
@@ -29,6 +48,7 @@ class Model1 extends PSystem {
     PVectorD dir = new PVectorD(0,0,0);
     PVectorD coh = new PVectorD(0,0,0);
     PVectorD rep = new PVectorD(0,0,0);
+    PVectorD perimGap = new PVectorD(0,0,0);
     PVectorD inter = new PVectorD(0,0,0);
     for(Particle p : S) {      
       p.nbr(S);
@@ -37,6 +57,7 @@ class Model1 extends PSystem {
     for(Particle p : S) {      
       avoid.set(0,0,0);
       dir.set(0,0,0);
+      perimGap.set(0,0,0);
       change.set(0,0,0); 
 
       /* Calculate Cohesion */
@@ -45,6 +66,11 @@ class Model1 extends PSystem {
       /* Calculate Repulsion */
       rep = repulsion(p);
 
+      /* Calculate Gap */
+      if (this._perimCompress) {
+        perimGap = gap2(p);
+      }
+            
       /* Calculate Obstacle avoidance */
       if (this.O.size() > 0) {
         avoid = avoidObstacles(p);
@@ -57,7 +83,8 @@ class Model1 extends PSystem {
       change.add(avoid);
       change.add(coh);
       change.add(rep);
-      
+      change.add(perimGap);
+
       inter = PVectorD.add(coh,rep);
       stepChange = change.copy();
       stepChange.setMag(p._topspeed);
@@ -84,7 +111,7 @@ class Model1 extends PSystem {
     }
   }
     
-  PVectorD cohesion(Particle p) {
+  public PVectorD cohesion(Particle p) {
 /** 
 * cohesion calculation - Calculates the cohesion between each agent and its neigbours.
 * 
@@ -102,10 +129,13 @@ class Model1 extends PSystem {
         System.exit(-1);
       }
       distance = PVectorD.dist(p._loc,n._loc);
-      if (this._perimCompress && p._isPerim && n._isPerim) {
-        v = PVectorD.sub(n._loc,p._loc).mult(this._pc).mult(this._kc);
+      v = PVectorD.sub(n._loc,p._loc);
+      if (this._perimCompress && this._compression > 0 && p._isPerim && n._isPerim) { // p-p
+//      if (this._perimCompress && (p._isPerim || n._isPerim)) { // p-p p-i i-p
+        v.mult(this._kc);
+        v.mult(this._pc);
       } else {
-        v = PVectorD.sub(n._loc,p._loc).mult(this._kc);
+        v.mult(this._kc);
       }
       vcb.add(v);
       if (this._loggingN && this._loggingP) {
@@ -122,14 +152,45 @@ class Model1 extends PSystem {
     return vcb;
   }
 
-  PVectorD repulsion(Particle p) {
-/** 
-* repulsion calculation - Calculates the repulsion between each agent and its neigbours.
-* 
-* @param p The particle that is currently being checked
-*/
-    PVectorD vrb = new PVectorD(0,0,0);
+  public PVectorD gap(Particle p){
+    PVectorD vgb = new PVectorD(0,0,0);
     PVectorD v = new PVectorD(0,0,0);
+    for (int i=0; i < p._gapStart.size(); i++) {
+        v = PVectorD.add(p._gapStart.get(i)._loc,p._gapEnd.get(i)._loc).mult(0.5);
+        v = PVectorD.sub(v,p._loc);
+        vgb.add(v);
+    }
+    if (p._gapStart.size() > 0) {
+      vgb.div(p._gapStart.size());
+    }
+    vgb.mult(this._kg);
+    return vgb;
+  }
+
+  public PVectorD gap2(Particle p){
+    PVectorD vgb = new PVectorD(0,0,0);
+    PVectorD v = new PVectorD(0,0,0);
+    if (p._gapStart.size() > 0) {
+        v = PVectorD.add(p._gapStart.get(0)._loc,p._gapEnd.get(0)._loc).mult(0.5);
+        v = PVectorD.sub(v,p._loc);
+        vgb.add(v);
+    }
+    //}
+    //if (p._gapStart.size() > 0) {
+    //  vgb.div(p._gapStart.size());
+   // }
+    vgb.mult(this._kg);
+    return vgb;
+  }
+
+  public PVectorD repulsion(Particle p) {
+    /** 
+    * repulsion calculation - Calculates the repulsion between each agent and its neigbours.
+    * 
+    * @param p The particle that is currently being checked
+    */
+    PVectorD vrb = new PVectorD(0,0);
+    PVectorD v = new PVectorD(0,0);
     int count = 0;
     double dist = 0.0;
     double distance = 0.0;
@@ -141,13 +202,24 @@ class Model1 extends PSystem {
       } else {
         dist = p._Rb;
       }
-      distance = PVectorD.dist(p._loc,n._loc);
-      if (distance <= dist & p != n) {
-        count++;
-        v = PVectorD.sub(p._loc, n._loc).setMag(dist - distance).mult(this._kr);
-        vrb.add(v);
+      distance = PVectorD.dist(p._loc,n._loc);                     // calculate neighbour distance
+      if (distance <= dist & p != n) {                                    // If this agent has an effect in this relationship
+        count++;                                                          // keep a record of the number of relationships
+        v = PVectorD.sub(p._loc, n._loc).setMag(p._Rb - distance); // Calculate initial vector
+        if (this._compression == 0 || !this._perimCompress) {             // if compression is off (by setting or interactive)
+          v.mult(this._kr);
+        } else if ((p._isPerim ^ n._isPerim) && (this._compression == 1)) { // Outer compression apply kr and pkr to i & p
+          v.mult(this._kr);
+          v.mult(this._pkr);
+        } else if ((!p._isPerim && n._isPerim) && (this._compression == 2)) { // Inner compression apply kr and pkr to i only
+          v.mult(this._kr);
+          v.mult(this._pkr);
+        } else {
+          v.mult(this._kr);                                     // Must be inner to inner relationship
+        }
+        vrb.add(v);                                             // Sum the neighbours
         if (this._loggingN && this._loggingP) {
-          nData += plog._counter + "," + p.logString(this._logMin) + "," + n.logString(this._logMin) + "," + v.x + "," + v.y + "," + v.z + "," + v.mag() + "\n";
+          nData = plog._counter + "," + p._id + "," + n.toString() + "," + v.x + "," + v.y + "," + v.z + "," + v.mag() + "," + distance + "\n";
         }
       }
     }
@@ -156,12 +228,12 @@ class Model1 extends PSystem {
       nRlog.clean();
     }
     if (count > 0) {
-      vrb.div(count);
+      vrb.div(count);                                           // Average the magnitude
     }
     return vrb;
   }
 
-  PVectorD direction(Particle p) {
+  public PVectorD direction(Particle p) {
 /** 
 * direction calculation - Calculates the normalised direction.
 * 

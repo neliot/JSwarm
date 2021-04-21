@@ -5,34 +5,34 @@
 * See history.txt
 */
 
-class PVectorD {
+public class PVectorD {
     double x;
     double y;
     double z;
 
-    static PRNG rand = new PRNG();
+    public static PRNG rand = new PRNG();
 
-    PVectorD() {
+    public PVectorD() {
     }
 
-    PVectorD(double xx, double yy) {
+    public PVectorD(double xx, double yy) {
         this.x=xx;
         this.y=yy;
         this.z=0;
     }
 
-    PVectorD(double xx, double yy, double zz) {
+    public PVectorD(double xx, double yy, double zz) {
         this.x=xx;
         this.y=yy;
         this.z=zz;
     }
 
-    static public PVectorD add(PVectorD v1, PVectorD v2) {
+    public static PVectorD add(PVectorD v1, PVectorD v2) {
         PVectorD result = new PVectorD((v1.x + v2.x),(v1.y + v2.y),(v1.z + v2.z));
         return result;
     }
 
-    static public PVectorD add(PVectorD v1, PVectorD v2, PVectorD target) {
+    public static PVectorD add(PVectorD v1, PVectorD v2, PVectorD target) {
         if (target == null) {
             target = new PVectorD(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
         } else {
@@ -41,12 +41,12 @@ class PVectorD {
         return target;
     }
     
-    static public PVectorD sub(PVectorD v1, PVectorD v2) {
+    public static PVectorD sub(PVectorD v1, PVectorD v2) {
         PVectorD result = new PVectorD((v1.x - v2.x),(v1.y - v2.y),(v1.z - v2.z));
         return result;
     }
 
-    static public PVectorD sub(PVectorD v1, PVectorD v2, PVectorD target) {
+    public static PVectorD sub(PVectorD v1, PVectorD v2, PVectorD target) {
         if (target == null) {
             target = new PVectorD(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
         } else {
@@ -55,7 +55,7 @@ class PVectorD {
         return target;
     }
 
-    static public PVectorD mult(PVectorD v, double n, PVectorD target) {
+    public static PVectorD mult(PVectorD v, double n, PVectorD target) {
         if (target == null) {
             target = new PVectorD(v.x*n, v.y*n, v.z*n);
         } else {
@@ -64,7 +64,7 @@ class PVectorD {
         return target;
     }
 
-    static public PVectorD div(PVectorD v, double n) {
+    public static PVectorD div(PVectorD v, double n) {
         v.set(v.x*n, v.y*n, v.z*n);
         return div(v, n, null);
     }

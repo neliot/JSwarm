@@ -4,6 +4,7 @@
 *************************************************
 * See history.txt
 */
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.File;
@@ -19,57 +20,59 @@ import org.json.JSONObject;
   
 import java.util.ArrayList; 
 
-abstract class PSystem {
-  java.util.Properties modelProperties = new java.util.Properties();
-  ArrayList<Particle> S = new ArrayList<Particle>();
-  ArrayList<Destination> D = new ArrayList<Destination>();
-  ArrayList<Obstacle> O = new ArrayList<Obstacle>();
-  boolean _lines = true;
-  int _swarmSize = 0;
-  double _kc = 0.3; // Must be < particle._topspeed to allow the swarm to stabalise to "pseudo equilibrium" (no jitter).
-  double _kr = 300; // Must be > _kc to prevent the swarm collapsing.
-  double _kd = 80; // Must be > particle._topspeed to allow free S to coalesce.
-  double _ko = 500; // Stay away from those O Eugene.
-  double _kg = 0; // mind the gap.
-  double _Cb = 70; // Cohesion range, Must be greater than range to repulsion range. 
-  double _Rb = 50; // Repulsion range, Must be less than range to allow cohesion.
-  double _Ob = 75; // GLobal Obstacle range (stored in each obstacle for future work)
-  double _pr = 1.0; // Compressed perimeter reduction divisor
-  double _pc = 1.0; // Compressed perimeter reduction divisor
-  int _seed = 1234;
-  int _grid = 500;
-  double _speed = 3.0; // Global agent speed (stored in each agent for future work)
-  boolean _obstacleLink = true;
-  boolean _dest = true;
-  boolean _run = true;
-  boolean _perimCoord = false;
-  boolean _perimCompress = true;
-  boolean _particleOptimise = false;
-  boolean _logMin = true;
+public abstract class PSystem {
+  public java.util.Properties modelProperties = new java.util.Properties();
+  public ArrayList<Particle> S = new ArrayList<Particle>();
+  public ArrayList<Destination> D = new ArrayList<Destination>();
+  public ArrayList<Obstacle> O = new ArrayList<Obstacle>();
+  public boolean _lines = true;
+  public int _swarmSize = 0;
+  public double _kc = 0.3; // Must be < particle._topspeed to allow the swarm to stabalise to "pseudo equilibrium" (no jitter).
+  public double _kr = 300; // Must be > _kc to prevent the swarm collapsing.
+  public double _kd = 80; // Must be > particle._topspeed to allow free S to coalesce.
+  public double _ko = 500; // Stay away from those O Eugene.
+  public double _kg = 0; // mind the gap.
+  public double _Cb = 70; // Cohesion range, Must be greater than range to repulsion range. 
+  public double _Rb = 50; // Repulsion range, Must be less than range to allow cohesion.
+  public double _Ob = 75; // GLobal Obstacle range (stored in each obstacle for future work)
+  public double _pr = 1.0; // Compressed perimeter reduction weight
+  public double _pkr = 1.0; // Compressed perimeter reduction weight
+  public double _pc = 1.0; // Compressed perimeter reduction weight
+  public int _compression = 1; // Compressed perimeter reduction weight
+  public int _seed = 1234;
+  public double _grid = 500;
+  public double _speed = 3.0; // Global agent speed (stored in each agent for future work)
+  public boolean _obstacleLink = true;
+  public boolean _dest = true;
+  public boolean _run = true;
+  public boolean _perimCoord = false;
+  public boolean _perimCompress = true;
+  public boolean _particleOptimise = false;
+  public boolean _logMin = true;
 
-  String _model; // Text of model type
-  String _modelId; // Model number.
+  public String _model; // Text of model type
+  public String _modelId; // Model number.
 
 //  int _nextParticleId = 0;
 //  int _nextDestId = 0;
 //  int _nextObsId = 0;
-  PVectorD _swarmDirection = new PVectorD();
-  boolean _loggingP = false;
-  boolean _loggingN = false;
-  Logger plog;
-  Logger nClog;
-  Logger nRlog;
+  public PVectorD _swarmDirection = new PVectorD();
+  public boolean _loggingP = false;
+  public boolean _loggingN = false;
+  public Logger plog;
+  public Logger nClog;
+  public Logger nRlog;
 
 
 // Abstract methods for model implementation
-  abstract void update();
-  abstract PVectorD cohesion(Particle p);
-  abstract PVectorD repulsion(Particle p);
-  abstract PVectorD direction(Particle p);
-  abstract void populate();
-  abstract void init();
+  public abstract void update();
+  public abstract PVectorD cohesion(Particle p);
+  public abstract PVectorD repulsion(Particle p);
+  public abstract PVectorD direction(Particle p);
+  public abstract void populate();
+  public abstract void init();
 
-  PSystem(String model, String modelId) {
+  public PSystem(String model, String modelId) {
 /** 
 * Sets up the environment with agents and parameters for the simulation
 * 
@@ -88,7 +91,7 @@ abstract class PSystem {
 // Default model properties
     this._swarmSize = Integer.parseInt(modelProperties.getProperty("size"));
     this._seed = Integer.parseInt(modelProperties.getProperty("seed"));
-    this._grid = Integer.parseInt(modelProperties.getProperty("grid"));
+    this._grid = Double.parseDouble(modelProperties.getProperty("grid"));
     this._Cb = Double.parseDouble(modelProperties.getProperty("Cb"));
     this._Rb = Double.parseDouble(modelProperties.getProperty("Rb"));
     this._kr = Double.parseDouble(modelProperties.getProperty("kr"));
@@ -100,7 +103,9 @@ abstract class PSystem {
     this._speed = Double.parseDouble(modelProperties.getProperty("speed"));
     this._obstacleLink = Boolean.parseBoolean(modelProperties.getProperty("obstacleLink"));
     this._pr = Double.parseDouble(modelProperties.getProperty("pr"));
+    this._pkr = Double.parseDouble(modelProperties.getProperty("pkr"));
     this._pc = Double.parseDouble(modelProperties.getProperty("pc"));
+    this._compression = Integer.parseInt(modelProperties.getProperty("compression"));
     this._dest = Boolean.parseBoolean(modelProperties.getProperty("dest"));
     this._perimCoord = Boolean.parseBoolean(modelProperties.getProperty("perimCoord"));
     this._perimCompress = Boolean.parseBoolean(modelProperties.getProperty("perimCompress"));
@@ -130,6 +135,15 @@ abstract class PSystem {
       this.populate();
     }
     this.init();  
+  }
+
+  public boolean checkUsed(double x, double y) {
+    for(Particle p : S) {      
+      if (p._loc.x == x && p._loc.y == y) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public PVectorD getCentroid() {
@@ -207,7 +221,9 @@ abstract class PSystem {
       jsonParams.put("kg",this._kg);
       jsonParams.put("ob",this._Ob);
       jsonParams.put("pr",this._pr);
+      jsonParams.put("pkr",this._pkr);
       jsonParams.put("pc",this._pc);
+      jsonParams.put("compression",this._compression);
       jsonParams.put("speed",this._speed);
       jsonParams.put("perim_coord",this._perimCoord);
 //  CROSS COMPATABILITY SETTINGS FOR PYTHON MODEL
@@ -314,7 +330,9 @@ abstract class PSystem {
       this._kg = params.getDouble("kg");
       this._Ob = params.getDouble("ob");
       this._pr = params.getDouble("pr");
+      this._pkr = params.getDouble("pkr");
       this._pc = params.getDouble("pc");
+      this._compression = params.getInt("compression");
       this._speed = params.getDouble("speed");
       this._perimCoord = params.getBoolean("perim_coord");
     } catch (JSONException e1) {
