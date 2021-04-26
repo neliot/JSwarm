@@ -13,6 +13,7 @@ import java.io.*;
 import org.json.*;
 import com.opencsv.*;
 import org.apache.commons.math3.stat.descriptive.moment.*;
+import org.apache.commons.math3.stat.descriptive.rank.*;
 import ec.*;
 import ec.simple.*;
 import ec.vector.*;
@@ -110,27 +111,48 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
       Map<String,String>     values    = null;
       int                    step      = 0;
       Vector<Double>         imags     = new Vector<>();
+      Vector<Double>         cmags     = new Vector<>();
+      Mean                   aMean     = new Mean();
       Variance               aVariance = new Variance();
+      Min                    aMin      = new Min();
+      int                    index     = -1;
+      double[]               meanImags = new double[IMAG_WINDOW];
       double                 varImag   = 0.0;
       while ((values = cr.readMap()) != null) {
         step        = Integer.parseInt(values.get("STEP"));
         step--; // restore count from zero
         int    id   = Integer.parseInt(values.get("ID"));
+        double cmag = Double.parseDouble(values.get("CMAG"));
         double imag = Double.parseDouble(values.get("IMAG"));
-        imags.add(imag);
         if ((step > 0) && (id == 0)) {
           double[] imagsd = new double[imags.size()];
           for (int i=0; i<imags.size(); i++)
             imagsd[i] = imags.get(i);
-          varImag = aVariance.evaluate(imagsd, 0, imags.size());
+          index = (index + 1) % IMAG_WINDOW;
+          meanImags[index] = aMean.evaluate(imagsd, 0, imags.size());
+          cmags.clear();
           imags.clear();
         }
+        cmags.add(cmag);
+        imags.add(imag);
       }
       double[] imagsd = new double[imags.size()];
       for (int i=0; i<imags.size(); i++)
         imagsd[i] = imags.get(i);
-      varImag = aVariance.evaluate(imagsd, 0, imags.size());
-      rawfit = varImag;
+      index = (index + 1) % IMAG_WINDOW;
+      meanImags[index] = aMean.evaluate(imagsd, 0, imags.size());
+      if (step >= IMAG_WINDOW)
+        varImag = aVariance.evaluate(meanImags, 0, IMAG_WINDOW);
+      double[] cmagsd = new double[cmags.size()];
+      //System.out.format("(%d) ", cmags.size());
+      for (int i=0; i<cmags.size(); i++) {
+        cmagsd[i] = cmags.get(i);
+        //System.out.format("%f ", cmagsd[i]);
+      }
+      //System.out.format("min: %f ", aMin.evaluate(cmagsd, 0, cmags.size()));
+      boolean cohesion = (aMin.evaluate(cmagsd, 0, cmags.size()) > 0.0);
+      System.out.format((cohesion) ? "true " : "false ");
+      rawfit = (cohesion? 0.0 : COH_PENALTY) + varImag;
       cr.close();
       fr.close();
     } catch (Exception e) {
@@ -139,22 +161,23 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
     return rawfit;
   }
 
-  public static final int    STEPS       = 1024;
-  public static final int    KC          = 0;
-  public static final int    KR          = 1;
-  public static final int    RB          = 2;
-  public static final int    CB          = 3;
-  public static final int    SPEED       = 4;
-  public static final double KC_MIN      = 0.1;
-  public static final double KC_MAX      = 0.2;
-  public static final double KR_MIN      = 40.0;
-  public static final double KR_MAX      = 60.0;
-  public static final double RB_MIN      = 1.5;
-  public static final double RB_MAX      = 2.5;
-  public static final double CB_MIN      = 2.5;
-  public static final double CB_MAX      = 3.5;
-  public static final double SPEED_MIN   = 0.04;
-  public static final double SPEED_MAX   = 0.06;
-  public static final double CB_MIN_MULT = 1.01;
-  public static final int    IMAG_WINDOW = 10;
+  public static final int    STEPS        = 1024;
+  public static final int    KC           = 0;
+  public static final int    KR           = 1;
+  public static final int    RB           = 2;
+  public static final int    CB           = 3;
+  public static final int    SPEED        = 4;
+  public static final double KC_MIN       = 0.1;
+  public static final double KC_MAX       = 0.2;
+  public static final double KR_MIN       = 40.0;
+  public static final double KR_MAX       = 60.0;
+  public static final double RB_MIN       = 1.5;
+  public static final double RB_MAX       = 2.5;
+  public static final double CB_MIN       = 2.5;
+  public static final double CB_MAX       = 3.5;
+  public static final double SPEED_MIN    = 0.04;
+  public static final double SPEED_MAX    = 0.06;
+  public static final double CB_MIN_MULT  = 1.01;
+  public static final int    IMAG_WINDOW  = 10;
+  public static final double COH_PENALTY  = 10.0;
 }
