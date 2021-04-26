@@ -35,10 +35,9 @@ public abstract class PSystem {
   public double _Cb = 70; // Cohesion range, Must be greater than range to repulsion range. 
   public double _Rb = 50; // Repulsion range, Must be less than range to allow cohesion.
   public double _Ob = 75; // GLobal Obstacle range (stored in each obstacle for future work)
-  public double _pr = 1.0; // Compressed perimeter reduction weight
-  public double _pkr = 1.0; // Compressed perimeter reduction weight
-  public double _pc = 1.0; // Compressed perimeter reduction weight
-  public int _compression = 1; // Compressed perimeter reduction weight
+  double[][] _pr = {{1.0,1.0},{1.0,1.0}}; // Compressed perimeter reduction weight
+  double[][] _pkr = {{1.0,1.0},{1.0,1.0}}; // Compressed perimeter -> inner reduction weight
+  double[][] _pkc = {{1.0,1.0},{1.0,1.0}}; // Compressed perimeter reduction weight//  public int _compression = 1; // Compressed perimeter reduction weight
   public int _seed = 1234;
   public double _grid = 500;
   public double _speed = 3.0; // Global agent speed (stored in each agent for future work)
@@ -102,10 +101,22 @@ public abstract class PSystem {
     this._Ob = Double.parseDouble(modelProperties.getProperty("Ob"));
     this._speed = Double.parseDouble(modelProperties.getProperty("speed"));
     this._obstacleLink = Boolean.parseBoolean(modelProperties.getProperty("obstacleLink"));
-    this._pr = Double.parseDouble(modelProperties.getProperty("pr"));
-    this._pkr = Double.parseDouble(modelProperties.getProperty("pkr"));
-    this._pc = Double.parseDouble(modelProperties.getProperty("pc"));
-    this._compression = Integer.parseInt(modelProperties.getProperty("compression"));
+    this._pr[0][0] = Double.parseDouble(modelProperties.getProperty("pr00"));
+    this._pr[0][1] = Double.parseDouble(modelProperties.getProperty("pr01"));
+    this._pr[1][0] = Double.parseDouble(modelProperties.getProperty("pr10"));
+    this._pr[1][1] = Double.parseDouble(modelProperties.getProperty("pr11"));
+    this._pkr[0][0] = Double.parseDouble(modelProperties.getProperty("pkr00"));
+    this._pkr[0][1] = Double.parseDouble(modelProperties.getProperty("pkr01"));
+    this._pkr[1][0] = Double.parseDouble(modelProperties.getProperty("pkr10"));
+    this._pkr[1][1] = Double.parseDouble(modelProperties.getProperty("pkr11"));
+    this._pkc[0][0] = Double.parseDouble(modelProperties.getProperty("pkc00"));
+    this._pkc[0][1] = Double.parseDouble(modelProperties.getProperty("pkc01"));
+    this._pkc[1][0] = Double.parseDouble(modelProperties.getProperty("pkc10"));
+    this._pkc[1][1] = Double.parseDouble(modelProperties.getProperty("pkc11"));
+//    this._pr = Double.parseDouble(modelProperties.getProperty("pr"));
+//    this._pkr = Double.parseDouble(modelProperties.getProperty("pkr"));
+//    this._pc = Double.parseDouble(modelProperties.getProperty("pc"));
+//    this._compression = Integer.parseInt(modelProperties.getProperty("compression"));
     this._dest = Boolean.parseBoolean(modelProperties.getProperty("dest"));
     this._perimCoord = Boolean.parseBoolean(modelProperties.getProperty("perimCoord"));
     this._perimCompress = Boolean.parseBoolean(modelProperties.getProperty("perimCompress"));
@@ -188,6 +199,15 @@ public abstract class PSystem {
       e1.printStackTrace();
     }
 
+    JSONArray jsonParamsPkr = new JSONArray();
+    JSONArray jsonParamsPkrData = new JSONArray();
+
+    JSONArray jsonParamsPr = new JSONArray();
+    JSONArray jsonParamsPrData = new JSONArray();
+
+    JSONArray jsonParamsPkc = new JSONArray();
+    JSONArray jsonParamsPkcData = new JSONArray();
+
     JSONObject jsonAgents = new JSONObject();
 //    JSONArray jsonAgentsProps = new JSONArray();
     JSONArray jsonAgentsCoords = new JSONArray();
@@ -220,10 +240,10 @@ public abstract class PSystem {
       jsonParams.put("ko",this._ko);
       jsonParams.put("kg",this._kg);
       jsonParams.put("ob",this._Ob);
-      jsonParams.put("pr",this._pr);
-      jsonParams.put("pkr",this._pkr);
-      jsonParams.put("pc",this._pc);
-      jsonParams.put("compression",this._compression);
+//      jsonParams.put("pr",this._pr);
+//      jsonParams.put("pkr",this._pkr);
+//      jsonParams.put("pc",this._pc);
+//      jsonParams.put("compression",this._compression);
       jsonParams.put("speed",this._speed);
       jsonParams.put("perim_coord",this._perimCoord);
 //  CROSS COMPATABILITY SETTINGS FOR PYTHON MODEL
@@ -231,6 +251,32 @@ public abstract class PSystem {
       jsonParams.put("stability_factor", 0.0);
       jsonParams.put("exp_rate", 0.2);
 
+      jsonParamsPkrData.put(0,this._pkr[0][0]);
+      jsonParamsPkrData.put(1,this._pkr[0][1]);
+      jsonParamsPkr.put(0,jsonParamsPkrData);
+      jsonParamsPkrData = new JSONArray();
+      jsonParamsPkrData.put(0,this._pkr[1][0]);
+      jsonParamsPkrData.put(1,this._pkr[1][1]);
+      jsonParamsPkr.put(1,jsonParamsPkrData);
+      jsonParams.put("pkr",jsonParamsPkr);
+  
+      jsonParamsPkcData.put(0,this._pkc[0][0]);
+      jsonParamsPkcData.put(1,this._pkc[0][1]);
+      jsonParamsPkc.put(0,jsonParamsPkcData);
+      jsonParamsPkcData = new JSONArray();
+      jsonParamsPkcData.put(0,this._pkc[1][0]);
+      jsonParamsPkcData.put(1,this._pkc[1][1]);
+      jsonParamsPkc.put(1,jsonParamsPkcData);
+      jsonParams.put("pkc",jsonParamsPkc);
+  
+      jsonParamsPrData.put(0,this._pr[0][0]);
+      jsonParamsPrData.put(1,this._pr[0][1]);
+      jsonParamsPr.put(0,jsonParamsPrData);
+      jsonParamsPrData = new JSONArray();
+      jsonParamsPrData.put(0,this._pr[1][0]);
+      jsonParamsPrData.put(1,this._pr[1][1]);
+      jsonParamsPr.put(1,jsonParamsPrData);
+      jsonParams.put("pr",jsonParamsPr);
 
       for(Particle p : S) {
 //      jsonAgentsProps.setJSONObject(i,p.getJSONProps());
@@ -321,6 +367,28 @@ public abstract class PSystem {
 */
     try {    
       JSONObject params = json.getJSONObject("params");
+
+      JSONArray pkr = json.getJSONObject("params").getJSONArray("pkr");
+      for(int x = 0; x < 2 ; x++) {
+        for(int y = 0; y < 2; y++) {
+          this._pkr[x][y] = pkr.getJSONArray(x).getDouble(y);
+        }
+      }
+  
+      JSONArray pkc = json.getJSONObject("params").getJSONArray("pkc");
+      for(int x = 0; x < 2 ; x++) {
+        for(int y = 0; y < 2; y++) {
+          this._pkc[x][y] = pkc.getJSONArray(x).getDouble(y);
+        }
+      }
+  
+      JSONArray pr = json.getJSONObject("params").getJSONArray("pr");
+      for(int x = 0; x < 2 ; x++) {
+        for(int y = 0; y < 2; y++) {
+          this._pr[x][y] = pr.getJSONArray(x).getDouble(y);
+        }
+      }
+
       this._Cb = params.getDouble("cb");
       this._Rb = params.getDouble("rb");
       this._kr = params.getDouble("kr");
@@ -329,10 +397,10 @@ public abstract class PSystem {
       this._ko = params.getDouble("ko");
       this._kg = params.getDouble("kg");
       this._Ob = params.getDouble("ob");
-      this._pr = params.getDouble("pr");
-      this._pkr = params.getDouble("pkr");
-      this._pc = params.getDouble("pc");
-      this._compression = params.getInt("compression");
+//      this._pr = params.getDouble("pr");
+//      this._pkr = params.getDouble("pkr");
+//      this._pc = params.getDouble("pc");
+//      this._compression = params.getInt("compression");
       this._speed = params.getDouble("speed");
       this._perimCoord = params.getBoolean("perim_coord");
     } catch (JSONException e1) {

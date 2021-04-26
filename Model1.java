@@ -5,15 +5,7 @@ public class Model1 extends PSystem {
   }
 
   public void init() {
-    if (this._compression == 1 && this._pkr > 1) {
-      System.out.println("Outer compression must have pkr <= 1");
-      System.exit(-1);
-    }
-    if (this._compression == 2 && this._pkr < 1) {
-      System.out.println("Inner compression must have pkr >= 1");
-      System.exit(-1);
-    }
-  };
+  }
 
   public void populate() {
     boolean used = false;
@@ -130,13 +122,11 @@ public class Model1 extends PSystem {
       }
       distance = PVectorD.dist(p._loc,n._loc);
       v = PVectorD.sub(n._loc,p._loc);
-      if (this._perimCompress && this._compression > 0 && p._isPerim && n._isPerim) { // p-p
+      if (this._perimCompress) { // p-p
 //      if (this._perimCompress && (p._isPerim || n._isPerim)) { // p-p p-i i-p
-        v.mult(this._kc);
-        v.mult(this._pc);
-      } else {
-        v.mult(this._kc);
+        v.mult(this._pkc[p.isPerim()][n.isPerim()]);
       }
+      v.mult(this._kc);
       vcb.add(v);
       if (this._loggingN && this._loggingP) {
         nData += plog._counter + "," + p.logString(_logMin) + "," + n.logString(_logMin) + "," + v.x + "," + v.y + "," + v.z + "," + v.mag() + "," + distance + "\n";
@@ -197,28 +187,24 @@ public class Model1 extends PSystem {
     String nData = "";
     for(Particle n : p._nbr) {
       // IF compress permeter then reduce repulsion field if both agents are perimeter agents.
+      dist = p._Rb;
       if (this._perimCompress && p._isPerim && n._isPerim) { 
-        dist = p._Rb * this._pr;
-      } else {
-        dist = p._Rb;
-      }
+        dist = dist * this._pr[p.isPerim()][n.isPerim()];
+      } 
       distance = PVectorD.dist(p._loc,n._loc);                     // calculate neighbour distance
       if (distance <= dist & p != n) {                                    // If this agent has an effect in this relationship
         count++;                                                          // keep a record of the number of relationships
         v = PVectorD.sub(p._loc, n._loc).setMag(p._Rb - distance); // Calculate initial vector
-        if (this._compression == 0 || !this._perimCompress) {             // if compression is off (by setting or interactive)
-          v.mult(this._kr);
-        } else if ((p._isPerim ^ n._isPerim) && (this._compression == 1)) { // Outer compression apply kr and pkr to i & p
-          v.mult(this._kr);
-          v.mult(this._pkr);
-        } else if ((!p._isPerim && n._isPerim) && (this._compression == 2)) { // Inner compression apply kr and pkr to i only
-          v.mult(this._kr);
-          v.mult(this._pkr);
-        } else {
-          v.mult(this._kr);                                     // Must be inner to inner relationship
+        if (this._perimCompress) {             // if compression is off (by setting or interactive)
+          v.mult(this._pkr[p.isPerim()][n.isPerim()]);
+        // } else if ((p._isPerim ^ n._isPerim) && (this._compression == 1)) { // Outer compression apply kr and pkr to i & p
+        //   v.mult(this._kr);
+        //   v.mult(this._pkr);
+        // } else if ((!p._isPerim && n._isPerim) && (this._compression == 2)) { // Inner compression apply kr and pkr to i only
+        //   v.mult(this._kr);
         }
-        vrb.add(v);                                             // Sum the neighbours
-        if (this._loggingN && this._loggingP) {
+        v.mult(this._kr);                      // Must be inner to inner relationship
+        vrb.add(v);        if (this._loggingN && this._loggingP) {
           nData = plog._counter + "," + p._id + "," + n.toString() + "," + v.x + "," + v.y + "," + v.z + "," + v.mag() + "," + distance + "\n";
         }
       }

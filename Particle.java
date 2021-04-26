@@ -122,7 +122,15 @@ class Particle {
       e.printStackTrace();
     }
     return p;
-  };
+  }
+
+  public int isPerim(){
+    if (this._isPerim) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
 
   public void setDestinations(ArrayList<Destination> D) {
 /** 
