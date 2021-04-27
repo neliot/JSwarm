@@ -104,14 +104,16 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
   
   static double fitness(PSystem system) {
     assert system != null : "system cannot be null";
+    int numAgents = getNumAgents(system);
+    assert numAgents > 0 : "numAgents > 0";
     double rawfit = 0.0;
     try {
       FileReader             fr        = new FileReader("data/csv/exp.p.csv");
       CSVReaderHeaderAware   cr        = new CSVReaderHeaderAware(fr);
       Map<String,String>     values    = null;
       int                    step      = 0;
-      Vector<Double>         imags     = new Vector<>();
-      Vector<Double>         cmags     = new Vector<>();
+      double[]               imags     = new double[numAgents];
+      double[]               cmags     = new double[numAgents];
       Mean                   aMean     = new Mean();
       Variance               aVariance = new Variance();
       Min                    aMin      = new Min();
@@ -125,32 +127,21 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
         double cmag = Double.parseDouble(values.get("CMAG"));
         double imag = Double.parseDouble(values.get("IMAG"));
         if ((step > 0) && (id == 0)) {
-          double[] imagsd = new double[imags.size()];
-          for (int i=0; i<imags.size(); i++)
-            imagsd[i] = imags.get(i);
-          index = (index + 1) % IMAG_WINDOW;
-          meanImags[index] = aMean.evaluate(imagsd, 0, imags.size());
-          cmags.clear();
-          imags.clear();
+          index            = (index + 1) % IMAG_WINDOW;
+          meanImags[index] = aMean.evaluate(imags, 0, numAgents);
         }
-        cmags.add(cmag);
-        imags.add(imag);
+        cmags[id] = cmag;
+        imags[id] = imag;
       }
-      double[] imagsd = new double[imags.size()];
-      for (int i=0; i<imags.size(); i++)
-        imagsd[i] = imags.get(i);
-      index = (index + 1) % IMAG_WINDOW;
-      meanImags[index] = aMean.evaluate(imagsd, 0, imags.size());
+      index            = (index + 1) % IMAG_WINDOW;
+      meanImags[index] = aMean.evaluate(imags, 0, numAgents);
       if (step >= IMAG_WINDOW)
         varImag = aVariance.evaluate(meanImags, 0, IMAG_WINDOW);
-      double[] cmagsd = new double[cmags.size()];
-      //System.out.format("(%d) ", cmags.size());
-      for (int i=0; i<cmags.size(); i++) {
-        cmagsd[i] = cmags.get(i);
-        //System.out.format("%f ", cmagsd[i]);
-      }
-      //System.out.format("min: %f ", aMin.evaluate(cmagsd, 0, cmags.size()));
-      boolean cohesion = (aMin.evaluate(cmagsd, 0, cmags.size()) > 0.0);
+      //System.out.format("(%d) ", numAgents);
+      //for (int i=0; i<numAgents; i++)
+        //System.out.format("%f ", cmags[i]);
+      //System.out.format("min: %f ", aMin.evaluate(cmags, 0, numAgents));
+      boolean cohesion = (aMin.evaluate(cmags, 0, numAgents) > 0.0);
       System.out.format((cohesion) ? "true " : "false ");
       rawfit = (cohesion? 0.0 : COH_PENALTY) + varImag;
       cr.close();
@@ -159,6 +150,25 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
       e.printStackTrace();
     }
     return rawfit;
+  }
+  
+  static int getNumAgents(PSystem system) {
+    assert system != null : "system cannot be null";
+    ByteArrayOutputStream baos   = new ByteArrayOutputStream();
+    PrintWriter           pw     = new PrintWriter(baos);
+    system.saveSwarmJSON(pw);
+    int numAgents = 0;
+    try {
+      JSONObject json    = new JSONObject(baos.toString());
+      JSONObject agents  = json.getJSONObject("agents");
+      JSONArray  coords  = agents.getJSONArray("coords");
+      JSONArray  xcoords = coords.optJSONArray(0);
+      numAgents          = xcoords.length();
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
+    //System.out.println("numAgents: "+ numAgents);
+    return numAgents;
   }
 
   public static final int    STEPS        = 1024;
