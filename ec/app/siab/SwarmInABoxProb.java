@@ -15,6 +15,7 @@ import com.opencsv.*;
 import org.apache.commons.math3.stat.descriptive.moment.*;
 import org.apache.commons.math3.stat.descriptive.rank.*;
 import org.apache.commons.math3.ml.distance.*;
+import org.apache.commons.lang3.*;
 import ec.*;
 import ec.simple.*;
 import ec.vector.*;
@@ -151,8 +152,9 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
       //System.out.format("min: %f ", aMin.evaluate(cmags, 0, numAgents));
       boolean posCmag = (aMin.evaluate(cmags, 0, numAgents) > 0.0);
       System.out.format((posCmag) ? "true " : "false ");
-      System.out.format("%d ", numLinks(numAgents, cb, xs, ys));
-      rawfit = (posCmag? 0.0 : POS_PENALTY) + varImag;
+      int nc = numComponents(numAgents, cb, xs, ys);
+      System.out.format("%d ", nc);
+      rawfit = (posCmag? 0.0 : POS_PENALTY) + (nc > 1? CON_PENALTY : 0.0) + varImag;
       cr.close();
       fr.close();
     } catch (Exception e) {
@@ -212,9 +214,92 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
     return nl;
   }
   
+  static int numComponents(int numAgents, double cb, double[] xs, double ys[]) {
+    assert numAgents > 0 : "numAgents > 0";
+    assert cb > 0.0 : "cb > 0.0";
+    assert xs != null : "xs cannot be null";
+    assert ys != null : "ys cannot be null";
+    assert xs.length == numAgents : "xs correct length";
+    assert ys.length == numAgents : "ys correct length";
+    int[] comps = new int[numAgents];
+    for (int i=0; i<numAgents; i++)
+      comps[i] = i;
+    //System.out.println(Arrays.toString(comps));
+    boolean changed = false;
+    do {
+      changed = false;
+      for (int i=0; i<numAgents; i++)
+        for (int j=0; j<i; j++)
+          if ((comps[j] != comps[i]) && (dist(xs[i], ys[i], xs[j], ys[j]) <= cb)) {
+            //System.out.println("["+i+","+j+"]");
+            replace(comps, comps[j], comps[i]);
+            changed = true;
+            //System.out.println(Arrays.toString(comps));
+          }
+    } while (changed);
+    Set<Integer> compSet = new HashSet<Integer>(Arrays.asList(ArrayUtils.toObject(comps)));
+    return compSet.size();
+  }
+  
+  static void replace(int[] comps, int before, int after) {
+    assert comps != null : "comps cannot be null";
+    assert (0 <= before) && (before < comps.length) : "before valid";
+    assert (0 <= after) && (after < comps.length) : "after valid";
+    assert before != after : "before != after";
+    for (int i=0; i<comps.length; i++)
+      if (comps[i] == before) {
+        comps[i] = after;
+        //System.out.println("comps["+i+"] = "+before+"->"+after);
+      }
+  }
+  
   static double dist(double x1, double y1, double x2, double y2) {
     EuclideanDistance ed = new EuclideanDistance();
     return ed.compute(new double[] {x1, y1}, new double[] {x2, y2});
+  }
+  
+  public static void main(String[] args) {
+    double[] xs = new double[] {
+        -4.795253959,
+        4.341997428,
+        -3.414469209,
+        -1.633357952,
+        3.600409172,
+        1.292484755,
+        2.579466053,
+        -0.275876297,
+        0.328081974,
+        -2.736040606
+    };
+    double[] ys = new double[] {
+        -0.479577373,
+        -0.060026142,
+        2.855440297,
+        0.216415581,
+        -3.250250202,
+        -0.992841476,
+        2.854629697,
+        4.139227709,
+        -4.204761539,
+        -3.143539707
+    };
+    int    numAgents = xs.length;
+    double cb        = 3.246005859375;
+    double[] xs2 = new double[] {0, 1, 2, 3, 0, 1, 2, 0, 1, 2 };
+    double[] ys2 = new double[] {0, 0, 0, 0, 1, 1, 1, 2, 2, 2 };
+
+    int numAgents2 = xs2.length;
+    double cb2 = 1.42;
+    double[] xs3 = new double[] {0, 1, 2, 1, 4, 3, 4, 2, 3, 4 };
+    double[] ys3 = new double[] {0, 1, 1, 2, 2, 3, 3, 4, 4, 4 };
+    int numAgents3 = xs2.length;
+    double cb3 = 1.42;
+    System.out.println("numLinks: "+numLinks(numAgents, cb, xs, ys));
+    System.out.println("nc: "+numComponents(numAgents, cb, xs, ys));
+    System.out.println("numLinks: "+numLinks(numAgents2, cb2, xs2, ys2));
+    System.out.println("nc: "+numComponents(numAgents2, cb2, xs2, ys2));
+    System.out.println("numLinks: "+numLinks(numAgents3, cb3, xs3, ys3));
+    System.out.println("nc: "+numComponents(numAgents3, cb3, xs3, ys3));
   }
 
   public static final int    STEPS        = 1024;
@@ -236,4 +321,5 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
   public static final double CB_MIN_MULT  = 1.01;
   public static final int    IMAG_WINDOW  = 10;
   public static final double POS_PENALTY  = 10.0;
+  public static final double CON_PENALTY  = 10.0;
 }
