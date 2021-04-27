@@ -14,6 +14,7 @@ import org.json.*;
 import com.opencsv.*;
 import org.apache.commons.math3.stat.descriptive.moment.*;
 import org.apache.commons.math3.stat.descriptive.rank.*;
+import org.apache.commons.math3.ml.distance.*;
 import ec.*;
 import ec.simple.*;
 import ec.vector.*;
@@ -106,12 +107,15 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
     assert system != null : "system cannot be null";
     int numAgents = getNumAgents(system);
     assert numAgents > 0 : "numAgents > 0";
+    double cb     = getCb(system);
     double rawfit = 0.0;
     try {
       FileReader             fr        = new FileReader("data/csv/exp.p.csv");
       CSVReaderHeaderAware   cr        = new CSVReaderHeaderAware(fr);
       Map<String,String>     values    = null;
       int                    step      = 0;
+      double[]               xs        = new double[numAgents];
+      double[]               ys        = new double[numAgents];
       double[]               imags     = new double[numAgents];
       double[]               cmags     = new double[numAgents];
       Mean                   aMean     = new Mean();
@@ -124,12 +128,16 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
         step        = Integer.parseInt(values.get("STEP"));
         step--; // restore count from zero
         int    id   = Integer.parseInt(values.get("ID"));
+        double x    = Double.parseDouble(values.get("X"));
+        double y    = Double.parseDouble(values.get("Y"));
         double cmag = Double.parseDouble(values.get("CMAG"));
         double imag = Double.parseDouble(values.get("IMAG"));
         if ((step > 0) && (id == 0)) {
           index            = (index + 1) % IMAG_WINDOW;
           meanImags[index] = aMean.evaluate(imags, 0, numAgents);
         }
+        xs[id]    = x;
+        ys[id]    = y;
         cmags[id] = cmag;
         imags[id] = imag;
       }
@@ -141,9 +149,10 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
       //for (int i=0; i<numAgents; i++)
         //System.out.format("%f ", cmags[i]);
       //System.out.format("min: %f ", aMin.evaluate(cmags, 0, numAgents));
-      boolean cohesion = (aMin.evaluate(cmags, 0, numAgents) > 0.0);
-      System.out.format((cohesion) ? "true " : "false ");
-      rawfit = (cohesion? 0.0 : COH_PENALTY) + varImag;
+      boolean posCmag = (aMin.evaluate(cmags, 0, numAgents) > 0.0);
+      System.out.format((posCmag) ? "true " : "false ");
+      System.out.format("%d ", numLinks(numAgents, cb, xs, ys));
+      rawfit = (posCmag? 0.0 : POS_PENALTY) + varImag;
       cr.close();
       fr.close();
     } catch (Exception e) {
@@ -154,8 +163,8 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
   
   static int getNumAgents(PSystem system) {
     assert system != null : "system cannot be null";
-    ByteArrayOutputStream baos   = new ByteArrayOutputStream();
-    PrintWriter           pw     = new PrintWriter(baos);
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    PrintWriter           pw   = new PrintWriter(baos);
     system.saveSwarmJSON(pw);
     int numAgents = 0;
     try {
@@ -169,6 +178,43 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
     }
     //System.out.println("numAgents: "+ numAgents);
     return numAgents;
+  }
+  
+  static double getCb(PSystem system) {
+    assert system != null : "system cannot be null";
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    PrintWriter           pw   = new PrintWriter(baos);
+    system.saveSwarmJSON(pw);
+    double cb = 0;
+    try {
+      JSONObject json   = new JSONObject(baos.toString());
+      JSONObject params = json.getJSONObject("params");
+      cb                = params.getDouble("cb");
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
+    //System.out.println("cb: "+ cb);
+    return cb;
+  }
+  
+  static int numLinks(int numAgents, double cb, double[] xs, double ys[]) {
+    assert numAgents > 0 : "numAgents > 0";
+    assert cb > 0.0 : "cb > 0.0";
+    assert xs != null : "xs cannot be null";
+    assert ys != null : "ys cannot be null";
+    assert xs.length == numAgents : "xs correct length";
+    assert ys.length == numAgents : "ys correct length";
+    int nl = 0;
+    for (int i=0; i<numAgents; i++)
+      for (int j=0; j<i; j++)
+        if (dist(xs[i], ys[i], xs[j], ys[j]) <= cb)
+          nl++;
+    return nl;
+  }
+  
+  static double dist(double x1, double y1, double x2, double y2) {
+    EuclideanDistance ed = new EuclideanDistance();
+    return ed.compute(new double[] {x1, y1}, new double[] {x2, y2});
   }
 
   public static final int    STEPS        = 1024;
@@ -189,5 +235,5 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
   public static final double SPEED_MAX    = 0.06;
   public static final double CB_MIN_MULT  = 1.01;
   public static final int    IMAG_WINDOW  = 10;
-  public static final double COH_PENALTY  = 10.0;
+  public static final double POS_PENALTY  = 10.0;
 }
