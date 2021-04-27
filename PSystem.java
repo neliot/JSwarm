@@ -101,18 +101,9 @@ public abstract class PSystem {
     this._Ob = Double.parseDouble(modelProperties.getProperty("Ob"));
     this._speed = Double.parseDouble(modelProperties.getProperty("speed"));
     this._obstacleLink = Boolean.parseBoolean(modelProperties.getProperty("obstacleLink"));
-    this._pr[0][0] = Double.parseDouble(modelProperties.getProperty("pr00"));
-    this._pr[0][1] = Double.parseDouble(modelProperties.getProperty("pr01"));
-    this._pr[1][0] = Double.parseDouble(modelProperties.getProperty("pr10"));
-    this._pr[1][1] = Double.parseDouble(modelProperties.getProperty("pr11"));
-    this._pkr[0][0] = Double.parseDouble(modelProperties.getProperty("pkr00"));
-    this._pkr[0][1] = Double.parseDouble(modelProperties.getProperty("pkr01"));
-    this._pkr[1][0] = Double.parseDouble(modelProperties.getProperty("pkr10"));
-    this._pkr[1][1] = Double.parseDouble(modelProperties.getProperty("pkr11"));
-    this._pkc[0][0] = Double.parseDouble(modelProperties.getProperty("pkc00"));
-    this._pkc[0][1] = Double.parseDouble(modelProperties.getProperty("pkc01"));
-    this._pkc[1][0] = Double.parseDouble(modelProperties.getProperty("pkc10"));
-    this._pkc[1][1] = Double.parseDouble(modelProperties.getProperty("pkc11"));
+    this._pr = getArray(modelProperties.getProperty("pr"));
+    this._pkr = getArray(modelProperties.getProperty("pkr"));
+    this._pkc = getArray(modelProperties.getProperty("pkc"));
 //    this._pr = Double.parseDouble(modelProperties.getProperty("pr"));
 //    this._pkr = Double.parseDouble(modelProperties.getProperty("pkr"));
 //    this._pc = Double.parseDouble(modelProperties.getProperty("pc"));
@@ -148,6 +139,16 @@ public abstract class PSystem {
     this.init();  
   }
 
+  public double[][] getArray(String data) {
+    double[][] result = new double[2][2];
+    String[] vals = data.split(",");
+    result[0][0] = Double.parseDouble(vals[0]);
+    result[0][1] = Double.parseDouble(vals[1]);
+    result[1][0] = Double.parseDouble(vals[2]);
+    result[1][1] = Double.parseDouble(vals[3]);
+    return result;
+  }
+  
   public boolean checkUsed(double x, double y) {
     for(Particle p : S) {      
       if (p._loc.x == x && p._loc.y == y) {
