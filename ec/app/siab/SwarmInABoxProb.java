@@ -33,10 +33,11 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
     if (!(ind instanceof BitVectorIndividual))
       state.output.fatal("Whoa!  It's not a BitVectorIndividual!!!",null);
 
-    BitVectorIndividual ind2   = (BitVectorIndividual)ind;
-    PSystem             system = indToSystem(ind2);
-    JSwarm.experiment(system); 
-    double              rawfit = fitness(system);
+    BitVectorIndividual   ind2   = (BitVectorIndividual)ind;
+    PSystem               system = indToSystem(ind2);
+    ByteArrayOutputStream baos   = new ByteArrayOutputStream();
+    JSwarm.experiment(system, baos);
+    double                rawfit = fitness(system, baos.toString());
     
     System.out.println(""+rawfit);
 
@@ -104,15 +105,15 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
     return system;
   }
   
-  static double fitness(PSystem system) {
+  static double fitness(PSystem system, String csv) {
     assert system != null : "system cannot be null";
     int numAgents = getNumAgents(system);
     assert numAgents > 0 : "numAgents > 0";
     double cb     = getCb(system);
     double rawfit = 0.0;
     try {
-      FileReader             fr        = new FileReader("data/csv/exp.p.csv");
-      CSVReaderHeaderAware   cr        = new CSVReaderHeaderAware(fr);
+      StringReader           sr        = new StringReader(csv);
+      CSVReaderHeaderAware   cr        = new CSVReaderHeaderAware(sr);
       Map<String,String>     values    = null;
       int                    step      = 0;
       double[]               xs        = new double[numAgents];
@@ -158,7 +159,6 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
       System.out.format("%.2f ", nd);
       rawfit = (posCmag? 0.0 : POS_PENALTY) + (nc > 1? CON_PENALTY : 0.0) + (DEG_WEIGHT/(1 + nd)) + varImag;
       cr.close();
-      fr.close();
     } catch (Exception e) {
       e.printStackTrace();
     }

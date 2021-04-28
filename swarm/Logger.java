@@ -6,8 +6,7 @@
 
 package swarm;
 
-import java.io.PrintWriter; 
-import java.io.File;
+import java.io.*;
 
 class Logger {
   PrintWriter _output = null;
@@ -26,6 +25,17 @@ class Logger {
 // JAVA-BASED Processing Mangles
 //   _output = new PrintWriter(new File(_filename));
     this._output = new PrintWriter(new File(_filename));
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.exit(-1);      
+    }
+  }
+  
+  Logger(OutputStream os) {
+    this._counter  = 1;
+    this._filename = null;
+    try {
+      this._output = new PrintWriter(os);
     } catch (Exception e) {
       e.printStackTrace();
       System.exit(-1);      
