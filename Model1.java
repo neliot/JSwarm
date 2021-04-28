@@ -191,10 +191,10 @@ public class Model1 extends PSystem {
       if (this._perimCompress && p._isPerim && n._isPerim) { 
         dist = dist * this._pr[p.isPerim()][n.isPerim()];
       } 
-      distance = PVectorD.dist(p._loc,n._loc);                     // calculate neighbour distance
-      if (distance <= dist & p != n) {                                    // If this agent has an effect in this relationship
-        count++;                                                          // keep a record of the number of relationships
-        v = PVectorD.sub(p._loc, n._loc).setMag(p._Rb - distance); // Calculate initial vector
+      distance = PVectorD.dist(p._loc,n._loc);                    // calculate neighbour distance
+      if (distance <= dist & p != n) {                            // If this agent has an effect in this relationship
+        count++;                                                  // keep a record of the number of relationships
+        v = PVectorD.sub(p._loc, n._loc).setMag(dist - distance); // Calculate initial vector
         if (this._perimCompress) {             // if compression is off (by setting or interactive)
           v.mult(this._pkr[p.isPerim()][n.isPerim()]);
         // } else if ((p._isPerim ^ n._isPerim) && (this._compression == 1)) { // Outer compression apply kr and pkr to i & p

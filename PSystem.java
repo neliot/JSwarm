@@ -38,6 +38,7 @@ public abstract class PSystem {
   double[][] _pr = {{1.0,1.0},{1.0,1.0}}; // Compressed perimeter reduction weight
   double[][] _pkr = {{1.0,1.0},{1.0,1.0}}; // Compressed perimeter -> inner reduction weight
   double[][] _pkc = {{1.0,1.0},{1.0,1.0}}; // Compressed perimeter reduction weight//  public int _compression = 1; // Compressed perimeter reduction weight
+  public double _stability_factor = 0.0;
   public int _seed = 1234;
   public double _grid = 500;
   public double _speed = 3.0; // Global agent speed (stored in each agent for future work)
@@ -104,6 +105,7 @@ public abstract class PSystem {
     this._pr = getArray(modelProperties.getProperty("pr"));
     this._pkr = getArray(modelProperties.getProperty("pkr"));
     this._pkc = getArray(modelProperties.getProperty("pkc"));
+    this._stability_factor = Double.parseDouble(modelProperties.getProperty("stability_factor"));
 //    this._pr = Double.parseDouble(modelProperties.getProperty("pr"));
 //    this._pkr = Double.parseDouble(modelProperties.getProperty("pkr"));
 //    this._pc = Double.parseDouble(modelProperties.getProperty("pc"));
@@ -249,7 +251,7 @@ public abstract class PSystem {
       jsonParams.put("perim_coord",this._perimCoord);
 //  CROSS COMPATABILITY SETTINGS FOR PYTHON MODEL
       jsonParams.put("scaling","linear");
-      jsonParams.put("stability_factor", 0.0);
+      jsonParams.put("stability_factor", this._stability_factor);
       jsonParams.put("exp_rate", 0.2);
 
       jsonParamsPkrData.put(0,this._pkr[0][0]);
@@ -403,6 +405,7 @@ public abstract class PSystem {
 //      this._pc = params.getDouble("pc");
 //      this._compression = params.getInt("compression");
       this._speed = params.getDouble("speed");
+      this._stability_factor = params.getDouble("stability_factor");
       this._perimCoord = params.getBoolean("perim_coord");
     } catch (JSONException e1) {
       e1.printStackTrace();
