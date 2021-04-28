@@ -154,7 +154,9 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
       System.out.format((posCmag) ? "true " : "false ");
       int nc = numComponents(numAgents, cb, xs, ys);
       System.out.format("%d ", nc);
-      rawfit = (posCmag? 0.0 : POS_PENALTY) + (nc > 1? CON_PENALTY : 0.0) + varImag;
+      double nd = numLinks(numAgents, cb, xs, ys)/(double)numAgents;
+      System.out.format("%.2f ", nd);
+      rawfit = (posCmag? 0.0 : POS_PENALTY) + (nc > 1? CON_PENALTY : 0.0) + (DEG_WEIGHT/(1 + nd)) + varImag;
       cr.close();
       fr.close();
     } catch (Exception e) {
@@ -322,4 +324,6 @@ public class SwarmInABoxProb extends Problem implements SimpleProblemForm {
   public static final int    IMAG_WINDOW  = 10;
   public static final double POS_PENALTY  = 10.0;
   public static final double CON_PENALTY  = 10.0;
+  public static final double DEG_WEIGHT   = 10.0;
+  public static final double DEG_PENALTY  = 10.0;
 }
