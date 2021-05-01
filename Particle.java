@@ -319,8 +319,10 @@ class Particle {
           this._isPerim = true;
 //POPULATE GAP AGENTS
 //          this._gap.clear();
-          this._gapStart.add(this._nbr.get(i));          
-          this._gapEnd.add(this._nbr.get(i+1));
+          if (dist > this._Cb) {
+            this._gapStart.add(this._nbr.get(i));          
+            this._gapEnd.add(this._nbr.get(i+1));
+          }
         }
       }
       angle = calcAngle(this._nbr.get(this._nbr.size()-1)._sweepAngle,this._nbr.get(0)._sweepAngle);
