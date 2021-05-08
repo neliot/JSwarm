@@ -27,13 +27,13 @@ public class JSwarm {
     system._run = true;
     int iterations = Integer.parseInt(system.modelProperties.getProperty("iterations"));
     System.out.println("Iterations:" + iterations);
-    System.out.println("Cb:"+system._Cb);
-    System.out.println("Rb:"+system._Rb);
+    System.out.println("C:"+system._C);
+    System.out.println("R:"+system._R);
     System.out.println("kc:"+system._kc);
     System.out.println("kr:"+system._kr);
-    System.out.println("pkc:"+ "[[" + system._pkc[0][0] + "," + system._pkc[0][1] +"],[" + system._pkc[1][0] + "," + system._pkc[1][1] + "]]" );
-    System.out.println("pkr:"+ "[[" + system._pkr[0][0] + "," + system._pkr[0][1] +"],[" + system._pkr[1][0] + "," + system._pkr[1][1] + "]]" );
-    System.out.println("pr:"+ "[[" + system._pr[0][0] + "," + system._pr[0][1] +"],[" + system._pr[1][0] + "," + system._pr[1][1] + "]]" );
+    System.out.println("kc:"+ "[[" + system._kc[0][0] + "," + system._kc[0][1] +"],[" + system._kc[1][0] + "," + system._kc[1][1] + "]]" );
+    System.out.println("kr:"+ "[[" + system._kr[0][0] + "," + system._kr[0][1] +"],[" + system._kr[1][0] + "," + system._kr[1][1] + "]]" );
+    System.out.println("cb:"+ "[[" + system._R[0][0] + "," + system._R[0][1] +"],[" + system._R[1][0] + "," + system._R[1][1] + "]]" );
     System.out.println("Compress:"+system._perimCompress);
     System.out.println("Speed:"+system._speed);
     for(int i = 0; i < iterations; i++) {
@@ -80,7 +80,7 @@ public class JSwarm {
   }
   
   static void experiment2(PSystem system) {
-    String load = "dk_both.json";
+    String load = "base.json";
     system._loggingP = true;
     system._loggingN = true;
     system._perimCompress = true;
