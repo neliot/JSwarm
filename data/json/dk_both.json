@@ -25,6 +25,7 @@
     "kc": 0.15,
     "kd": 0,
     "kg": 0,
+    "gap_filling": 0,
     "cb": 3
   },
   "agents": {"coords": [

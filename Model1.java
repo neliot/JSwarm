@@ -1,4 +1,3 @@
-
 public class Model1 extends PSystem {
   Model1() {
     super("Linear Vector + Void Reduction","1");
@@ -21,7 +20,7 @@ public class Model1 extends PSystem {
           used = checkUsed(nextX,nextY);
         }
         // create agent in centred quartile.
-        S.add(new Particle(Particle._nextParticleId++,nextX,nextY,0.0,this._Cb,this._Rb,this._speed));
+        S.add(new Particle(Particle._nextParticleId++,nextX,nextY,0.0,this._speed));
       } catch (Exception e) {
         System.out.println(e);
         System.exit(-1);
@@ -43,14 +42,18 @@ public class Model1 extends PSystem {
     PVectorD perimGap = new PVectorD(0,0,0);
     PVectorD inter = new PVectorD(0,0,0);
     for(Particle p : S) {      
-      p.nbr(S);
-      p.checkNbrs();
+      p.nbr(S,this._C);
+    }
+    for(Particle p : S) {      
+      p.checkNbrs(this._rgf, this._C);
     }
     for(Particle p : S) {      
       avoid.set(0,0,0);
       dir.set(0,0,0);
-      perimGap.set(0,0,0);
       change.set(0,0,0); 
+      perimGap.set(0,0,0);
+      coh.set(0,0,0);
+      rep.set(0,0,0);
 
       /* Calculate Cohesion */
       coh = cohesion(p);
@@ -78,22 +81,20 @@ public class Model1 extends PSystem {
       change.add(perimGap);
 
       inter = PVectorD.add(coh,rep);
-      stepChange = change.copy();
-      stepChange.setMag(p._topspeed);
-      
+   
       if (_loggingP) {
         if (_logMin) {
-          pData += plog._counter + "," + p.logString(_logMin) + "," + coh.x + "," + coh.y + "," + coh.mag() + "," + rep.x + "," + rep.y + "," + rep.mag() + "," + inter.x + "," + inter.y + "," + inter.mag() + "," + dir.x + "," + dir.y + "," + dir.mag() + "," + stepChange.x + "," + stepChange.y + "," + stepChange.mag() + "\n";
+          pData += plog._counter + "," + p.logString(_logMin) + "," + coh.x + "," + coh.y + "," + coh.mag() + "," + rep.x + "," + rep.y + "," + rep.mag() + "," + inter.x + "," + inter.y + "," + inter.mag() + "," + dir.x + "," + dir.y + "," + dir.mag() + "," + change.x + "," + change.y + "," + change.mag() + "\n";
         } else {
-          pData += plog._counter + "," + p.logString(_logMin) + "," + coh.x + "," + coh.y + "," + coh.z + "," + coh.mag() + "," + rep.x + "," + rep.y + "," +  rep.z + "," + rep.mag() + "," + inter.x + "," + inter.y + "," +  inter.z + "," + inter.mag() + "," + avoid.x + "," + avoid.y + "," + avoid.z + "," + avoid.mag() + "," + dir.x + "," + dir.y + "," + dir.z + "," + dir.mag() + "," + stepChange.x + "," + stepChange.y + "," + stepChange.z + "," + stepChange.mag() + "\n";
+          pData += plog._counter + "," + p.logString(_logMin) + "," + coh.x + "," + coh.y + "," + coh.z + "," + coh.mag() + "," + rep.x + "," + rep.y + "," +  rep.z + "," + rep.mag() + "," + inter.x + "," + inter.y + "," +  inter.z + "," + inter.mag() + "," + avoid.x + "," + avoid.y + "," + avoid.z + "," + avoid.mag() + "," + dir.x + "," + dir.y + "," + dir.z + "," + dir.mag() + "," + change.x + "," + change.y + "," + change.z + "," + change.mag() + "\n";
         }
       }
       p.setChange(change);
     }
     if (this._run) {
-      _swarmDirection.set(0,0,0);
+//      _swarmDirection.set(0,0,0);
       for(Particle p : S) {
-        _swarmDirection.add(p._resultant);
+//        _swarmDirection.add(p._resultant);
         p.update(this._particleOptimise);
       }
     }
@@ -120,15 +121,15 @@ public class Model1 extends PSystem {
         System.out.println("ERROR:" + n._id + ":" + p._id);
         System.exit(-1);
       }
-      distance = PVectorD.dist(p._loc,n._loc);
       v = PVectorD.sub(n._loc,p._loc);
-      if (this._perimCompress) { // p-p
-//      if (this._perimCompress && (p._isPerim || n._isPerim)) { // p-p p-i i-p
-        v.mult(this._pkc[p.isPerim()][n.isPerim()]);
+      if (this._perimCompress) {
+        v.mult(this._kc[p.isPerim()][n.isPerim()]);
+      } else {
+        v.mult(this._kc[0][0]);
       }
-      v.mult(this._kc);
       vcb.add(v);
       if (this._loggingN && this._loggingP) {
+        distance = PVectorD.dist(p._loc,n._loc);
         nData += plog._counter + "," + p.logString(_logMin) + "," + n.logString(_logMin) + "," + v.x + "," + v.y + "," + v.z + "," + v.mag() + "," + distance + "\n";
       }
     }
@@ -165,10 +166,6 @@ public class Model1 extends PSystem {
         v = PVectorD.sub(v,p._loc);
         vgb.add(v);
     }
-    //}
-    //if (p._gapStart.size() > 0) {
-    //  vgb.div(p._gapStart.size());
-   // }
     vgb.mult(this._kg);
     return vgb;
   }
@@ -187,24 +184,22 @@ public class Model1 extends PSystem {
     String nData = "";
     for(Particle n : p._nbr) {
       // IF compress permeter then reduce repulsion field if both agents are perimeter agents.
-      dist = p._Rb;
-      if (this._perimCompress && p._isPerim && n._isPerim) { 
-        dist = dist * this._pr[p.isPerim()][n.isPerim()];
-      } 
+      if (this._perimCompress) { 
+        dist = this._R[p.isPerim()][n.isPerim()];
+      } else {
+        dist = this._R[0][0];
+      }
       distance = PVectorD.dist(p._loc,n._loc);                    // calculate neighbour distance
       if (distance <= dist & p != n) {                            // If this agent has an effect in this relationship
         count++;                                                  // keep a record of the number of relationships
         v = PVectorD.sub(p._loc, n._loc).setMag(dist - distance); // Calculate initial vector
         if (this._perimCompress) {             // if compression is off (by setting or interactive)
-          v.mult(this._pkr[p.isPerim()][n.isPerim()]);
-        // } else if ((p._isPerim ^ n._isPerim) && (this._compression == 1)) { // Outer compression apply kr and pkr to i & p
-        //   v.mult(this._kr);
-        //   v.mult(this._pkr);
-        // } else if ((!p._isPerim && n._isPerim) && (this._compression == 2)) { // Inner compression apply kr and pkr to i only
-        //   v.mult(this._kr);
+          v.mult(this._kr[p.isPerim()][n.isPerim()]);
+        } else {
+          v.mult(this._kr[0][0]);
         }
-        v.mult(this._kr);                      // Must be inner to inner relationship
-        vrb.add(v);        if (this._loggingN && this._loggingP) {
+        vrb.add(v);        
+        if (this._loggingN && this._loggingP) {
           nData = plog._counter + "," + p._id + "," + n.toString() + "," + v.x + "," + v.y + "," + v.z + "," + v.mag() + "," + distance + "\n";
         }
       }
