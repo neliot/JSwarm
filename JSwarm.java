@@ -80,7 +80,7 @@ public class JSwarm {
   }
   
   static void experiment2(PSystem system) {
-    String load = "base.json";
+    String load = "loose.json";
     system._loggingP = true;
     system._loggingN = true;
     system._perimCompress = true;
