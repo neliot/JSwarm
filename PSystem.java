@@ -65,7 +65,6 @@ public abstract class PSystem {
   public Logger nClog;
   public Logger nRlog;
 
-
 // Abstract methods for model implementation
   public abstract void update();
   public abstract PVectorD cohesion(Particle p);
@@ -94,10 +93,6 @@ public abstract class PSystem {
     this._swarmSize = Integer.parseInt(modelProperties.getProperty("size"));
     this._seed = Integer.parseInt(modelProperties.getProperty("seed"));
     this._grid = Double.parseDouble(modelProperties.getProperty("grid"));
-//    this._Cb = Double.parseDouble(modelProperties.getProperty("Cb"));
-//    this._Rb = Double.parseDouble(modelProperties.getProperty("Rb"));
-//    this._kr = Double.parseDouble(modelProperties.getProperty("kr"));
-//    this._kc = Double.parseDouble(modelProperties.getProperty("kc"));
     this._kd = Double.parseDouble(modelProperties.getProperty("kd"));
     this._ko = Double.parseDouble(modelProperties.getProperty("ko"));
     this._kg = Double.parseDouble(modelProperties.getProperty("kg"));
@@ -105,16 +100,11 @@ public abstract class PSystem {
     this._Ob = Double.parseDouble(modelProperties.getProperty("Ob"));
     this._speed = Double.parseDouble(modelProperties.getProperty("speed"));
     this._obstacleLink = Boolean.parseBoolean(modelProperties.getProperty("obstacleLink"));
-//    this._pr = getArray(modelProperties.getProperty("pr"));
     this._kr = getArray(modelProperties.getProperty("kr"));
     this._kc = getArray(modelProperties.getProperty("kc"));
     this._R = getArray(modelProperties.getProperty("rb"));
     this._C = Double.parseDouble(modelProperties.getProperty("cb"));
     this._stability_factor = Double.parseDouble(modelProperties.getProperty("stability_factor"));
-//    this._pr = Double.parseDouble(modelProperties.getProperty("pr"));
-//    this._pkr = Double.parseDouble(modelProperties.getProperty("pkr"));
-//    this._pc = Double.parseDouble(modelProperties.getProperty("pc"));
-//    this._compression = Integer.parseInt(modelProperties.getProperty("compression"));
     this._dest = Boolean.parseBoolean(modelProperties.getProperty("dest"));
     this._perimCoord = Boolean.parseBoolean(modelProperties.getProperty("perimCoord"));
     this._perimCompress = Boolean.parseBoolean(modelProperties.getProperty("perimCompress"));
@@ -410,7 +400,7 @@ public abstract class PSystem {
 //      this._ko = params.getDouble("ko");
       this._kg = params.getDouble("kg");
       this._rgf = params.getBoolean("rgf");
-      this._Ob = params.getDouble("ob");
+//      this._Ob = params.getDouble("ob");
 //      this._speed = params.getDouble("speed");
       this._stability_factor = params.getDouble("stability_factor");
       this._perimCoord = params.getBoolean("perim_coord");
