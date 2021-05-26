@@ -200,7 +200,7 @@ public class Model1 extends PSystem {
         }
         vrb.add(v);        
         if (this._loggingN && this._loggingP) {
-          nData = plog._counter + "," + p._id + "," + n.toString() + "," + v.x + "," + v.y + "," + v.z + "," + v.mag() + "," + distance + "\n";
+          nData += plog._counter + "," + p.logString(this._logMin) + "," + n.logString(this._logMin) + "," + v.x + "," + v.y + "," + v.z + "," + v.mag() + "\n";
         }
       }
     }
