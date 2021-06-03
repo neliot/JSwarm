@@ -17,6 +17,10 @@
 *   You should have received a copy of the GNU General Public License
 *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ****************************************************************************/
+import swarm.PSystem;
+import swarm.Logger;
+import swarm.Model1;
+
 import java.io.FileInputStream;  
 
 public class JSwarm {

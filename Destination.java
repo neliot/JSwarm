@@ -3,6 +3,7 @@
 *************************************************
 * See history.txt
 */
+package swarm;
 
 import org.json.JSONObject;
 import org.json.JSONException;

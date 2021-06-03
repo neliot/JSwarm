@@ -4,6 +4,8 @@
 * See history.txt
 */
 
+package swarm;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 

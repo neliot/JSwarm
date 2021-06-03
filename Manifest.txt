@@ -1,2 +1,0 @@
-Main-Class: JSwarm
-Class-Path: ./lib/org.json.jar

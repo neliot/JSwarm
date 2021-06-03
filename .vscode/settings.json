@@ -4,6 +4,7 @@
         "org.json.jar"
     ],
     "java.project.sourcePaths": [
-        ""
+        "",
+        "eliot\\jswarm"
     ]
 }

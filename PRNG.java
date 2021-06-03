@@ -22,6 +22,8 @@
   * specify it in detail.
   */ 
 
+package swarm;
+
 class PRNG {
   private int  bitSz = 48;          //Ref: wiki on Linear PRNG,
   private long m = 1L << bitSz,     //     doc for java.util.Random class

@@ -1,5 +1,7 @@
+package swarm;
+
 public class Model1 extends PSystem {
-  Model1() {
+  public Model1() {
     super("Linear Vector + Void Reduction","1");
   }
 

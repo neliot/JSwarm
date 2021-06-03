@@ -5,6 +5,8 @@
 * See history.txt
 */
 
+package swarm;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.File;
@@ -36,10 +38,10 @@ public abstract class PSystem {
 //  public double _Cb = 70; // Cohesion range, Must be greater than range to repulsion range. 
 //  public double _Rb = 50; // Repulsion range, Must be less than range to allow cohesion.
   public double _Ob = 75; // GLobal Obstacle range (stored in each obstacle for future work)
-  double[][] _kr = {{1.0,1.0},{1.0,1.0}}; // Compressed perimeter reduction weight
-  double[][] _kc = {{1.0,1.0},{1.0,1.0}}; // Compressed perimeter -> inner reduction weight
-  double[][] _R = {{1.0,1.0},{1.0,1.0}}; // Compressed perimeter reduction weight//  public int _compression = 1; // Compressed perimeter reduction weight
-  double _C = 1; // Cohesion
+  public double[][] _kr = {{1.0,1.0},{1.0,1.0}}; // Compressed perimeter reduction weight
+  public double[][] _kc = {{1.0,1.0},{1.0,1.0}}; // Compressed perimeter -> inner reduction weight
+  public double[][] _R = {{1.0,1.0},{1.0,1.0}}; // Compressed perimeter reduction weight//  public int _compression = 1; // Compressed perimeter reduction weight
+  public double _C = 1; // Cohesion
   public double _stability_factor = 0.0;
   public int _seed = 1234;
   public double _grid = 500;
@@ -77,7 +79,7 @@ public abstract class PSystem {
 /** 
 * Sets up the environment with agents and parameters for the simulation
 * 
-*/ 
+*/  
     this._model = model;
     this._modelId = modelId;
 

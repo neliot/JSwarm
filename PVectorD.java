@@ -5,6 +5,8 @@
 * See history.txt
 */
 
+package swarm;
+
 public class PVectorD {
     double x;
     double y;
