@@ -42,6 +42,7 @@ class Particle {
 * @param Rb repulse repulsion range of agents
 * @param size diameter of agent
 * @param mass mass of agent (can be used to effect speed)
+* @param speed step size
 */
     this._id = i;
 //    this._Cb = Cb; // Currently not used.
@@ -62,10 +63,7 @@ class Particle {
 * @param x location
 * @param y location
 * @param z location
-* @param Cb cohesion range of agents
-* @param Rb repulse repulsion range of agents
-* @param size diameter of agent
-* @param mass mass of agent (can be used to effect speed)
+* @param speed step size
 */
     this._id = i;
 //    this._Cb = Cb; // Currently not used.
@@ -85,8 +83,6 @@ class Particle {
 * @param x location
 * @param y location
 * @param z location
-* @param Cb cohesion range of agents
-* @param Rb repulse repulsion range of agents
 */
     this._id = i;
 //    this._Cb = Cb; // Currently not used.
@@ -209,13 +205,13 @@ class Particle {
 * Updates the position of the particle based on the accumulated vectors.
 */
     PVectorD next = this._loc.copy().add(_resultant);
-//    if (optimise) {
-//      if (PVectorD.dist(this._loc,next) > this._topspeed) {
-//        this._resultant.limit(_topspeed);    
-//      }
-//    } else {
+    if (optimise) {
+      if (PVectorD.dist(this._loc,next) > this._topspeed) {
         this._resultant.limit(_topspeed);    
-//    }
+      }
+    } else {
+        this._resultant.limit(_topspeed);    
+    }
     // helping the garbage collector again;
     this._nextLocation.x = this._loc.x;
     this._nextLocation.y = this._loc.y;

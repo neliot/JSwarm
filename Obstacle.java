@@ -15,7 +15,7 @@ class Obstacle {
   PVectorD _loc;
   double _size = 10.0;
   double _mass = 1.0;
-  double _Ob = 50;
+  double _Ob = 50; // Currently not used.
   
   Obstacle(int i, double x, double y, double z) {
 /** 

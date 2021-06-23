@@ -49,6 +49,7 @@ public abstract class PSystem {
   public boolean _obstacleLink = true;
   public boolean _dest = true;
   public boolean _run = true;
+  int _step = 0;
   public boolean _perimCoord = false;
   public boolean _perimCompress = true;
   public boolean _particleOptimise = false;
@@ -230,23 +231,10 @@ public abstract class PSystem {
     JSONArray jsonObstaclesZ = new JSONArray();
     
     try {
-//      jsonParams.put("cb",this._Cb);
-//    jsonParams.put("seed",this._seed);
-//    jsonParams.put("grid",this._grid);
-//      jsonParams.put("rb",this._Rb);
-//      jsonParams.put("kr",this._kr);
-//      jsonParams.put("kc",this._kc);
       jsonParams.put("kd",this._kd);
-//      jsonParams.put("ko",this._ko);
       jsonParams.put("kg",this._kg);
       jsonParams.put("rgf",this._rgf);
-//      jsonParams.put("ob",this._Ob);
-//      jsonParams.put("R",this._R);
       jsonParams.put("cb",this._C);
-//      jsonParams.put("pr",this._pr);
-//      jsonParams.put("pkr",this._pkr);
-//      jsonParams.put("pc",this._pc);
-//      jsonParams.put("compression",this._compression);
       jsonParams.put("speed",this._speed);
       jsonParams.put("perim_coord",this._perimCoord);
 //  CROSS COMPATABILITY SETTINGS FOR PYTHON MODEL
@@ -323,7 +311,7 @@ public abstract class PSystem {
       jsonDestinationsCoords.put(jsonDestinationsZ);
 
       jsonDestinations.put("coords",jsonDestinationsCoords);
-//    jsonDestinations.put("props",jsonDestinationsProps);
+//      jsonDestinations.put("props",jsonDestinationsProps);
       json.put("obstacles",jsonObstacles);
       json.put("destinations",jsonDestinations);
       json.put("agents",jsonAgents);
@@ -392,18 +380,11 @@ public abstract class PSystem {
         }
       }
 
-//      this._Cb = params.getDouble("cb");
-//      this._Rb = params.getDouble("rb");
       this._C = params.getDouble("cb");
-      // this._R = params.getDouble("R");
-      // this._kr = params.getDouble("kr");
-      // this._kc = params.getDouble("kc");
       this._kd = params.getDouble("kd");
-//      this._ko = params.getDouble("ko");
       this._kg = params.getDouble("kg");
       this._rgf = params.getBoolean("rgf");
-//      this._Ob = params.getDouble("ob");
-//      this._speed = params.getDouble("speed");
+      this._speed = params.getDouble("speed");
       this._stability_factor = params.getDouble("stability_factor");
       this._perimCoord = params.getBoolean("perim_coord");
     } catch (JSONException e1) {

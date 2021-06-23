@@ -83,20 +83,20 @@ public class Model1 extends PSystem {
       change.add(perimGap);
 
       inter = PVectorD.add(coh,rep);
-   
+
       if (_loggingP) {
         if (_logMin) {
-          pData += plog._counter + "," + p.logString(_logMin) + "," + coh.x + "," + coh.y + "," + coh.mag() + "," + rep.x + "," + rep.y + "," + rep.mag() + "," + inter.x + "," + inter.y + "," + inter.mag() + "," + dir.x + "," + dir.y + "," + dir.mag() + "," + change.x + "," + change.y + "," + change.mag() + "\n";
+          pData += plog._counter + "," + p.logString(this._logMin) + "," + coh.x + "," + coh.y + "," + coh.mag() + "," + rep.x + "," + rep.y + "," + rep.mag() + "," + inter.x + "," + inter.y + "," + inter.mag() + "," + dir.x + "," + dir.y + "," + dir.mag() + "," + change.x + "," + change.y + "," + change.mag() + "\n";
         } else {
-          pData += plog._counter + "," + p.logString(_logMin) + "," + coh.x + "," + coh.y + "," + coh.z + "," + coh.mag() + "," + rep.x + "," + rep.y + "," +  rep.z + "," + rep.mag() + "," + inter.x + "," + inter.y + "," +  inter.z + "," + inter.mag() + "," + avoid.x + "," + avoid.y + "," + avoid.z + "," + avoid.mag() + "," + dir.x + "," + dir.y + "," + dir.z + "," + dir.mag() + "," + change.x + "," + change.y + "," + change.z + "," + change.mag() + "\n";
+          pData += plog._counter + "," + p.logString(this._logMin) + "," + coh.x + "," + coh.y + "," + coh.z + "," + coh.mag() + "," + rep.x + "," + rep.y + "," +  rep.z + "," + rep.mag() + "," + inter.x + "," + inter.y + "," +  inter.z + "," + inter.mag() + "," + avoid.x + "," + avoid.y + "," + avoid.z + "," + avoid.mag() + "," + dir.x + "," + dir.y + "," + dir.z + "," + dir.mag() + "," + change.x + "," + change.y + "," + change.z + "," + change.mag() + "\n";
         }
       }
       p.setChange(change);
     }
     if (this._run) {
-//      _swarmDirection.set(0,0,0);
+//      _swarmDirection.set(0,0,0); // Part of Procesing Visualisation
       for(Particle p : S) {
-//        _swarmDirection.add(p._resultant);
+//        _swarmDirection.add(p._resultant); // Part of Procesing Visualisation
         p.update(this._particleOptimise);
       }
     }
@@ -119,7 +119,7 @@ public class Model1 extends PSystem {
     
 // GET ALL THE NEIGHBOURS
     for(Particle n : p._nbr) {
-      if (p._loc.x == n._loc.x && p._loc.y == n._loc.y) {
+      if (p._loc.x == n._loc.x && p._loc.y == n._loc.y) { // DROP OUT ON AGENT CLASH
         System.out.println("ERROR:" + n._id + ":" + p._id);
         System.exit(-1);
       }
