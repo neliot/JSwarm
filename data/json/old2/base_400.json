@@ -31,16 +31,14 @@
                 50.0
             ]
         ],
-        "ka": [0.0, 0.0],
-        "kd": [1.0, 1.0],
+        "kd": 0.0,
         "kg": 0.0,
-        "arange": 50, 
         "scaling": "linear",
         "exp_rate": 0.2,
         "speed": 0.05,
-        "gain": 0.005,
         "stability_factor": 0.0,
-        "rgf": true
+        "perim_coord": "false",
+        "rgf": false
     },
     "agents": {
         "coords": [

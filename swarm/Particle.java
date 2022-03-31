@@ -85,8 +85,6 @@ class Particle {
 * @param z location
 */
     this._id = i;
-//    this._Cb = Cb; // Currently not used.
-//    this._Rb = Rb; // Currently not used.
     this._loc = new PVectorD(x,y,z);
     this._nextLocation = new PVectorD(x,y,z);
     this._resultant = new PVectorD(0,0,0);
@@ -103,8 +101,6 @@ class Particle {
     try {
       p.put("size",this._size);
       p.put("mass",this._mass);
-//      p.put("cb",this._Cb);
-//      p.put("rb",this._Rb);
       p.put("top_speed",this._topspeed); 
       p.put("id", this._id);
     } catch (JSONException e) {
@@ -181,7 +177,6 @@ class Particle {
     }
   }
 
-
   public String toString() {
 /** 
 * Creates a formatted string of particle data.
@@ -200,17 +195,22 @@ class Particle {
     this._resultant.set(f);
   }
 
-  public void update(boolean optimise) {
+  public void update(boolean optimise, String scaling, double gain) {
 /** 
 * Updates the position of the particle based on the accumulated vectors.
 */
-    PVectorD next = this._loc.copy().add(_resultant);
-    if (optimise) {
-      if (PVectorD.dist(this._loc,next) > this._topspeed) {
+    if (scaling.equals("linear")) {
+      this._resultant.mult(gain);  
+//      this._resultant.limit(this._topspeed);    
+    } else {
+      if (optimise) {
+        PVectorD next = this._loc.copy().add(_resultant);
+        if (PVectorD.dist(this._loc,next) > this._topspeed) {
+          this._resultant.limit(_topspeed);    
+        } // else go with the vector for the movement
+      } else {
         this._resultant.limit(_topspeed);    
       }
-    } else {
-        this._resultant.limit(_topspeed);    
     }
     // helping the garbage collector again;
     this._nextLocation.x = this._loc.x;
@@ -224,9 +224,12 @@ class Particle {
 * Updates the position of the particle based on the _resultant.
 */
     // Copy values rather than object! Lets help the garbage collector out!
-    this._loc.x = rtodp(this._nextLocation.x,9);
-    this._loc.y = rtodp(this._nextLocation.y,9);
-    this._loc.z = rtodp(this._nextLocation.z,9);
+//    this._loc.x = rtodp(this._nextLocation.x,9);
+//    this._loc.y = rtodp(this._nextLocation.y,9);
+//    this._loc.z = rtodp(this._nextLocation.z,9);
+    this._loc.x = this._nextLocation.x;
+    this._loc.y = this._nextLocation.y;
+    this._loc.z = this._nextLocation.z;
   }
 
   public void reset() {
@@ -256,7 +259,7 @@ class Particle {
     return Math.abs(diff);
   }
 
-  public void checkNbrs(boolean gap, double c) {
+  public void checkNbrs(boolean rgf, double c) {
 /** 
 * Examines the S neighbours to determine if the agent is on an edge.
 * 
@@ -290,7 +293,6 @@ class Particle {
         }
       }
     }
-
 //SWEEP THE ANGLES 
     if (this._nbr.size() > 0) {
       for (int i = 0; i < this._nbr.size()-1; i++) {
@@ -299,8 +301,7 @@ class Particle {
         if ( dist > c || angle > Math.PI) {
           this._isPerim = true;
 //POPULATE GAP AGENTS
-//          this._gap.clear();
-          if (dist > c || gap) {
+          if (dist > c || rgf) {
             this._gapStart.add(this._nbr.get(i));          
             this._gapEnd.add(this._nbr.get(i+1));
           }
@@ -311,8 +312,7 @@ class Particle {
       if (dist > c  || angle > Math.PI) {
         this._isPerim = true;
 //POPULATE GAP AGENTS
-//        this._gap.clear();
-        if (dist > c || gap) {
+        if (dist > c || rgf) {
           this._gapStart.add(this._nbr.get(0));          
           this._gapEnd.add(this._nbr.get(this._nbr.size()-1));
         }

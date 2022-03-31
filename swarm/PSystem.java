@@ -19,7 +19,7 @@ import java.time.LocalTime;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-  
+
 import java.util.ArrayList; 
 
 public abstract class PSystem {
@@ -29,28 +29,29 @@ public abstract class PSystem {
   public ArrayList<Obstacle> O = new ArrayList<Obstacle>();
   public boolean _lines = true;
   public int _swarmSize = 0;
-//  public double _kc = 0.3; // Must be < particle._topspeed to allow the swarm to stabalise to "pseudo equilibrium" (no jitter).
-//  public double _kr = 300; // Must be > _kc to prevent the swarm collapsing.
-  public double _kd = 80; // Must be > particle._topspeed to allow free S to coalesce.
-  public double _ko = 500; // Stay away from those O Eugene.
+  public double _arange = 500; // Must be > particle._topspeed to allow free S to coalesce.
+  public double _ko = 1; // Stay away from those O Eugene.
   public double _kg = 0; // mind the gap.
   public boolean _rgf = false; // mind the gap.
-//  public double _Cb = 70; // Cohesion range, Must be greater than range to repulsion range. 
-//  public double _Rb = 50; // Repulsion range, Must be less than range to allow cohesion.
-  public double _Ob = 75; // GLobal Obstacle range (stored in each obstacle for future work)
+  public double _gain = 0.002; // gain controller.
+  public double _Ob = 1; // Global Obstacle range (stored in each obstacle for future work)
   public double[][] _kr = {{1.0,1.0},{1.0,1.0}}; // Compressed perimeter reduction weight
   public double[][] _kc = {{1.0,1.0},{1.0,1.0}}; // Compressed perimeter -> inner reduction weight
   public double[][] _R = {{1.0,1.0},{1.0,1.0}}; // Compressed perimeter reduction weight//  public int _compression = 1; // Compressed perimeter reduction weight
+  public double[] _kd = {1.0,1.0}; // Directional Bias
+  public double[] _ka = {1.0,1.0}; // Adversarial Bias
   public double _C = 1; // Cohesion
   public double _stability_factor = 0.0;
+  public String _scaling = "non-linear"; 
   public int _seed = 1234;
   public double _grid = 500;
   public double _speed = 3.0; // Global agent speed (stored in each agent for future work)
   public boolean _obstacleLink = true;
-  public boolean _dest = true;
+//  public boolean _dest = true;
+  //public boolean _adver = true;
   public boolean _run = true;
   int _step = 0;
-  public boolean _perimCoord = false;
+//  public boolean _perimCoord = false;
   public boolean _perimCompress = true;
   public boolean _particleOptimise = false;
   public boolean _logMin = true;
@@ -58,10 +59,10 @@ public abstract class PSystem {
   public String _model; // Text of model type
   public String _modelId; // Model number.
 
-//  int _nextParticleId = 0;
-//  int _nextDestId = 0;
-//  int _nextObsId = 0;
-//  public PVectorD _swarmDirection = new PVectorD();
+  int _nextParticleId = 0;
+  int _nextDestId = 0;
+  int _nextObsId = 0;
+  public PVectorD _swarmDirection = new PVectorD();
   public boolean _loggingP = false;
   public boolean _loggingN = false;
   public Logger plog;
@@ -85,7 +86,7 @@ public abstract class PSystem {
     this._modelId = modelId;
 
     try {
-//        modelProperties.load(new FileInputStream("Model" + this._modelId + ".properties"));
+//      modelProperties.load(new FileInputStream("Model" + this._modelId + ".properties"));
 //  JAVA-BASED PROPERTIES (Processing Mangles the paths)
       modelProperties.load(new FileInputStream("Model" + this._modelId + ".properties"));
     } catch(Exception e) {
@@ -96,20 +97,25 @@ public abstract class PSystem {
     this._swarmSize = Integer.parseInt(modelProperties.getProperty("size"));
     this._seed = Integer.parseInt(modelProperties.getProperty("seed"));
     this._grid = Double.parseDouble(modelProperties.getProperty("grid"));
-    this._kd = Double.parseDouble(modelProperties.getProperty("kd"));
+    this._arange = Double.parseDouble(modelProperties.getProperty("arange"));
     this._ko = Double.parseDouble(modelProperties.getProperty("ko"));
     this._kg = Double.parseDouble(modelProperties.getProperty("kg"));
     this._rgf = Boolean.parseBoolean(modelProperties.getProperty("rgf"));
     this._Ob = Double.parseDouble(modelProperties.getProperty("Ob"));
     this._speed = Double.parseDouble(modelProperties.getProperty("speed"));
+    this._gain = Double.parseDouble(modelProperties.getProperty("gain"));
     this._obstacleLink = Boolean.parseBoolean(modelProperties.getProperty("obstacleLink"));
+    this._scaling = modelProperties.getProperty("scaling");
     this._kr = getArray(modelProperties.getProperty("kr"));
     this._kc = getArray(modelProperties.getProperty("kc"));
     this._R = getArray(modelProperties.getProperty("rb"));
+    this._kd = getArray2(modelProperties.getProperty("kd"));
+    this._ka = getArray2(modelProperties.getProperty("ka"));
     this._C = Double.parseDouble(modelProperties.getProperty("cb"));
     this._stability_factor = Double.parseDouble(modelProperties.getProperty("stability_factor"));
-    this._dest = Boolean.parseBoolean(modelProperties.getProperty("dest"));
-    this._perimCoord = Boolean.parseBoolean(modelProperties.getProperty("perimCoord"));
+//    this._dest = Boolean.parseBoolean(modelProperties.getProperty("dest"));
+//    this._adver = Boolean.parseBoolean(modelProperties.getProperty("adver"));
+//    this._perimCoord = Boolean.parseBoolean(modelProperties.getProperty("perimCoord"));
     this._perimCompress = Boolean.parseBoolean(modelProperties.getProperty("perimCompress"));
     this._run = Boolean.parseBoolean(modelProperties.getProperty("run"));
     this._logMin = Boolean.parseBoolean(modelProperties.getProperty("logMin"));
@@ -128,15 +134,7 @@ public abstract class PSystem {
         this.nClog.dump("STEP,PID,NID,X,Y,Z,RANGE,REPULSE,SIZE,MASS,PERIM,COHX,COHY,COHZ,MAG,DIST\n");    
         this.nRlog.dump("STEP,PID,NID,X,Y,Z,RANGE,REPULSE,SIZE,MASS,PERIM,REPX,REPY,REPZ,MAG\n");  
       }
-    } 
-
-// Random swarm or load current saved model
-    if (Boolean.parseBoolean(modelProperties.getProperty("loadSwarm"))) {
-      this.loadSwarm();
-    } else {
-      this.populate();
-    }
-    this.init();  
+    }  
   }
 
   public double[][] getArray(String data) {
@@ -149,6 +147,14 @@ public abstract class PSystem {
     return result;
   }
   
+  public double[] getArray2(String data) {
+    double[] result = new double[2];
+    String[] vals = data.split(",");
+    result[0] = Double.parseDouble(vals[0]);
+    result[1] = Double.parseDouble(vals[1]);
+    return result;
+  }
+
   public boolean checkUsed(double x, double y) {
     for(Particle p : S) {      
       if (p._loc.x == x && p._loc.y == y) {
@@ -206,6 +212,9 @@ public abstract class PSystem {
     JSONArray jsonParamsR = new JSONArray();
     JSONArray jsonParamsRData = new JSONArray();
 
+    JSONArray jsonParamsKd = new JSONArray();
+    JSONArray jsonParamsKa = new JSONArray();
+
     JSONArray jsonParamsKc = new JSONArray();
     JSONArray jsonParamsKcData = new JSONArray();
 
@@ -231,16 +240,26 @@ public abstract class PSystem {
     JSONArray jsonObstaclesZ = new JSONArray();
     
     try {
-      jsonParams.put("kd",this._kd);
+//      jsonParams.put("kd",this._kd);
+      jsonParams.put("arange",this._arange);
+//      jsonParams.put("adver",this._adver);
       jsonParams.put("kg",this._kg);
       jsonParams.put("rgf",this._rgf);
       jsonParams.put("cb",this._C);
       jsonParams.put("speed",this._speed);
-      jsonParams.put("perim_coord",this._perimCoord);
-//  CROSS COMPATABILITY SETTINGS FOR PYTHON MODEL
-      jsonParams.put("scaling","linear");
+      jsonParams.put("gain",this._gain);
+//      jsonParams.put("perim_coord",this._perimCoord);
+      jsonParams.put("scaling",this._scaling);
       jsonParams.put("stability_factor", this._stability_factor);
       jsonParams.put("exp_rate", 0.2);
+
+      jsonParamsKd.put(0,this._kd[0]);
+      jsonParamsKd.put(1,this._kd[1]);
+      jsonParams.put("kd",jsonParamsKd);
+  
+      jsonParamsKa.put(0,this._ka[0]);
+      jsonParamsKa.put(1,this._ka[1]);
+      jsonParams.put("ka",jsonParamsKa);
 
       jsonParamsKrData.put(0,this._kr[0][0]);
       jsonParamsKrData.put(1,this._kr[0][1]);
@@ -356,6 +375,9 @@ public abstract class PSystem {
 * Load environment settings from JSON file.
 *
 */
+    this.D.clear();
+    this.S.clear();
+    this.O.clear();
     try {    
       JSONObject params = json.getJSONObject("params");
 
@@ -364,6 +386,16 @@ public abstract class PSystem {
         for(int y = 0; y < 2; y++) {
           this._kr[x][y] = kr.getJSONArray(x).getDouble(y);
         }
+      }
+
+      JSONArray kd = json.getJSONObject("params").getJSONArray("kd");
+      for(int x = 0; x < 2 ; x++) {
+        this._kd[x] = kd.getDouble(x);
+      }
+  
+      JSONArray ka = json.getJSONObject("params").getJSONArray("ka");
+      for(int x = 0; x < 2 ; x++) {
+        this._ka[x] = ka.getDouble(x);
       }
   
       JSONArray kc = json.getJSONObject("params").getJSONArray("kc");
@@ -381,12 +413,13 @@ public abstract class PSystem {
       }
 
       this._C = params.getDouble("cb");
-      this._kd = params.getDouble("kd");
+      this._arange = params.getDouble("arange");
       this._kg = params.getDouble("kg");
       this._rgf = params.getBoolean("rgf");
       this._speed = params.getDouble("speed");
+      this._gain = params.getDouble("gain");
+      this._scaling = params.getString("scaling");
       this._stability_factor = params.getDouble("stability_factor");
-      this._perimCoord = params.getBoolean("perim_coord");
     } catch (JSONException e1) {
       e1.printStackTrace();
     }
@@ -403,7 +436,6 @@ public abstract class PSystem {
     }
     try {
       for (int i = 0; i < coords.getJSONArray(0).length(); i++) {
-//      JSONObject p = props.getJSONObject(i);
         JSONArray x = coords.getJSONArray(0);
         JSONArray y = coords.getJSONArray(1);
         JSONArray z = coords.getJSONArray(2);
@@ -414,32 +446,8 @@ public abstract class PSystem {
       e2.printStackTrace();
       System.exit(-1);
     }
-
-//    props = json.getJSONObject("destinations").getJSONArray("props");
-    try {
-      coords = json.getJSONObject("destinations").getJSONArray("coords");
-    } catch (JSONException e) {
-      e.printStackTrace();
-    }
-
-    try {
-      for (int i = 0; i < coords.getJSONArray(0).length(); i++) {
-//      JSONObject d = props.getJSONObject(i);
-        JSONArray x = coords.getJSONArray(0);
-        JSONArray y = coords.getJSONArray(1);
-        JSONArray z = coords.getJSONArray(2);
-
-        Destination dest = new Destination(i, (double)x.getDouble(i), (double)y.getDouble(i), (double)z.getDouble(i));
-        D.add(dest);
-        Destination._nextDestId = i + 1;
-        for(Particle p : S) {
-          p.addDestination(dest);
-        }
-      }
-    } catch (JSONException e) {
-      e.printStackTrace();
-    }
-
+    
+    coords = null;
 //    props = json.getJSONObject("obstacles").getJSONArray("props");
     try {
       coords = json.getJSONObject("obstacles").getJSONArray("coords");
@@ -458,10 +466,34 @@ public abstract class PSystem {
       }
     } catch (JSONException e) {
       e.printStackTrace();
-    } 
-// Initialise the swarm based on current model requirements.    
-    this.init(); 
-  }
+    }
+    
+    coords = null;
+    //    props = json.getJSONObject("destinations").getJSONArray("props");
+        try {
+          coords = json.getJSONObject("destinations").getJSONArray("coords");
+        } catch (JSONException e) {
+          e.printStackTrace();
+        }
+    
+        try {
+          for (int i = 0; i < coords.getJSONArray(0).length(); i++) {
+    //      JSONObject d = props.getJSONObject(i);
+            JSONArray x = coords.getJSONArray(0);
+            JSONArray y = coords.getJSONArray(1);
+            JSONArray z = coords.getJSONArray(2);
+    
+            Destination dest = new Destination(i, (double)x.getDouble(i), (double)y.getDouble(i), (double)z.getDouble(i));
+            D.add(dest);
+            Destination._nextDestId = i + 1;
+            for(Particle p : S) {
+              p.addDestination(dest);
+            }
+          }
+        } catch (JSONException e) {
+          e.printStackTrace();
+        }
+}
   
   public void moveReset() {
     if(this._run) {
@@ -486,7 +518,7 @@ public abstract class PSystem {
       }
     }
     result.add(calcLineRepulsion(p));
-    return result.mult(-_ko);
+    return result.mult(-this._ko);
   }
 
   public PVectorD calcLineRepulsion(Particle p) {
@@ -566,7 +598,7 @@ public abstract class PSystem {
 * @param z Z Position
 */
     Destination d = new Destination(Destination._nextDestId++,(double)x,(double)y,(double)z);
-     this.D.add(d);
+    this.D.add(d);
     for(Particle p : S) {
       p.addDestination(d);
     }

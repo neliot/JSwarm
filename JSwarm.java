@@ -38,7 +38,7 @@ public class JSwarm {
     System.out.println("kc:"+ "[[" + system._kc[0][0] + "," + system._kc[0][1] +"],[" + system._kc[1][0] + "," + system._kc[1][1] + "]]" );
     System.out.println("kr:"+ "[[" + system._kr[0][0] + "," + system._kr[0][1] +"],[" + system._kr[1][0] + "," + system._kr[1][1] + "]]" );
     System.out.println("cb:"+ "[[" + system._R[0][0] + "," + system._R[0][1] +"],[" + system._R[1][0] + "," + system._R[1][1] + "]]" );
-    System.out.println("kd:"+system._kd);
+//    System.out.println("kd:"+system._kd);
     System.out.println("Speed:"+system._speed);
     for(int i = 0; i < iterations; i++) {
       system.update();
@@ -51,9 +51,7 @@ public class JSwarm {
   }
 
   static void experiment(PSystem system, String jsonFile) {
-    system._loggingP = true;
-    system._loggingN = true;
-    system._perimCompress = true;
+//    system._perimCompress = true;
     system._run = true;
     system.loadSwarm(jsonFile);
     Logger jlog = new Logger("data/csv/json.txt");
@@ -62,15 +60,18 @@ public class JSwarm {
 
     int iterations = Integer.parseInt(system.modelProperties.getProperty("iterations"));
     System.out.println("JSON - " + jsonFile);
-    System.out.println("Running - " + iterations);
     System.out.println("Iterations:" + iterations);
     System.out.println("C:" + system._C);
+    System.out.println("scaling:" + system._scaling);
     System.out.println("kc:" + "[[" + system._kc[0][0] + "," + system._kc[0][1] +"],[" + system._kc[1][0] + "," + system._kc[1][1] + "]]" );
     System.out.println("kr:" + "[[" + system._kr[0][0] + "," + system._kr[0][1] +"],[" + system._kr[1][0] + "," + system._kr[1][1] + "]]" );
     System.out.println("cb:" + "[[" + system._R[0][0] + "," + system._R[0][1] +"],[" + system._R[1][0] + "," + system._R[1][1] + "]]" );
-    System.out.println("kd:" + system._kd);
+    System.out.println("kd:" + "[" + system._kd[0] + "," + system._kd[1] + "]");
+    System.out.println("ka:" + "[" + system._ka[0] + "," + system._ka[1] + "]");
+    System.out.println("arange:" + system._arange);
     System.out.println("rgf:" + system._rgf);
     System.out.println("Speed:" + system._speed);
+    System.out.println("gain:" + system._gain);
     for(int i = 0; i < iterations; i++) {
       System.out.print(".");
       System.out.flush();  
@@ -99,6 +100,8 @@ public class JSwarm {
       System.exit(-1);
     }  
     system = new Model1();
+    system._loggingP = true;
+    system._loggingN = true;
     System.out.println(_NAME + " : "+ _VERSION);
     experiment(system,args[0]);
   }

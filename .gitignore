@@ -1,3 +1,12 @@
 csv
 .vscode
 .ipynb_checkpoints
+/Destination.class
+/JSwarm.class
+/Logger.class
+/Model1.class
+/Obstacle.class
+/PRNG.class
+/PSystem.class
+/PVectorD.class
+/Particle.class
