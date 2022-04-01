@@ -59,7 +59,7 @@ public class JSwarm {
     jlog.quit();
 
     int iterations = Integer.parseInt(system.modelProperties.getProperty("iterations"));
-    System.out.println("JSON - " + jsonFile);
+    System.out.println("JSON:" + jsonFile);
     System.out.println("Iterations:" + iterations);
     System.out.println("C:" + system._C);
     System.out.println("scaling:" + system._scaling);
@@ -89,6 +89,7 @@ public class JSwarm {
     PSystem system = null;
     String _NAME = "JSwarm";
     String _VERSION = "0.1.7";
+    String _AUTHOR = "NE";
     String _DATE = "01/04/2022";
     java.util.Properties properties = new java.util.Properties();    
     FileInputStream in;
@@ -103,7 +104,9 @@ public class JSwarm {
     system = new Model1();
     system._loggingP = true;
     system._loggingN = true;
-    System.out.println(_NAME + "-" + _VERSION + " (" + _DATE + ")");
+    System.out.println("===================================");
+    System.out.println(_NAME + "-" + _VERSION + " (" + _AUTHOR + ") (" + _DATE + ")");
+    System.out.println("===================================");
     experiment(system,args[0]);
   }
 }
