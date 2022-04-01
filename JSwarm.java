@@ -87,8 +87,9 @@ public class JSwarm {
       System.exit(-1);
     }
     PSystem system = null;
-    String _NAME = "PSwarm";
-    String _VERSION = "0.1.5";
+    String _NAME = "JSwarm";
+    String _VERSION = "0.1.7";
+    String _DATE = "01/04/2022";
     java.util.Properties properties = new java.util.Properties();    
     FileInputStream in;
     // FOR FUTURE WORK WHEN USING MORE THAN 1 MODEL
@@ -102,7 +103,7 @@ public class JSwarm {
     system = new Model1();
     system._loggingP = true;
     system._loggingN = true;
-    System.out.println(_NAME + " : "+ _VERSION);
+    System.out.println(_NAME + "-" + _VERSION + " (" + _DATE + ")");
     experiment(system,args[0]);
   }
 }
